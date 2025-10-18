@@ -9,13 +9,12 @@ export default function App() {
   const [history, setHistory] = useState([]);
   const [apiError, setApiError] = useState(false);
 
-  // === 履歴取得 ===
   const fetchHistory = async () => {
     try {
       const res = await fetch("https://my-ai-poster.onrender.com/api/history");
       
       if (!res.ok) {
-        console.warn(`履歴取得失敗: ${res.status}`);
+        console.warn(`Error: ${res.status}`);
         setApiError(true);
         return;
       }
@@ -24,7 +23,7 @@ export default function App() {
       setHistory(Array.isArray(data) ? data : []);
       setApiError(false);
     } catch (err) {
-      console.error("履歴取得エラー:", err);
+      console.error("Error:", err);
       setApiError(true);
     }
   };
@@ -33,15 +32,14 @@ export default function App() {
     fetchHistory();
   }, []);
 
-  // === 投稿生成処理 ===
   const handleGenerate = async () => {
     if (!topic.trim()) {
-      setMessage("❌ テーマを入力してください");
+      setMessage("テーマを入力してください");
       return;
     }
 
     setLoading(true);
-    setMessage("⏳ 生成中...");
+    setMessage("生成中...");
     setGeneratedText("");
 
     try {
@@ -56,23 +54,23 @@ export default function App() {
       });
 
       if (!response.ok) {
-        throw new Error(`サーバーエラー: ${response.status}`);
+        throw new Error(`Server error: ${response.status}`);
       }
 
       const data = await response.json();
 
       if (data.success) {
         setGeneratedText(data.generated_text);
-        setMessage(data.message || "✅ Threadsに投稿＆保存しました!");
+        setMessage(data.message || "Threadsに投稿＆保存しました!");
         setTopic("");
         setScheduleTime("");
         fetchHistory();
       } else {
-        setMessage(`❌ ${data.error || "エラーが発生しました"}`);
+        setMessage(`エラー: ${data.error || "エラーが発生しました"}`);
       }
     } catch (error) {
-      console.error("投稿エラー:", error);
-      setMessage("🚨 サーバーに接続できません。しばらくしてからお試しください。");
+      console.error("Error:", error);
+      setMessage("サーバーに接続できません。しばらくしてからお試しください。");
     } finally {
       setLoading(false);
     }
@@ -81,7 +79,6 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-100 via-pink-50 to-purple-100 py-12 px-4">
       <div className="max-w-4xl mx-auto">
-        {/* ヘッダー */}
         <div className="text-center mb-12">
           <div className="inline-block bg-white rounded-full p-4 shadow-lg mb-4">
             <span className="text-5xl">🌸</span>
@@ -92,10 +89,8 @@ export default function App() {
           <p className="text-gray-600">Threads自動投稿システム</p>
         </div>
 
-        {/* メインカード */}
         <div className="bg-white rounded-3xl shadow-2xl p-8 mb-8 backdrop-blur-sm bg-opacity-95">
           <div className="space-y-6">
-            {/* テーマ入力 */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 📝 投稿テーマ
@@ -109,7 +104,6 @@ export default function App() {
               />
             </div>
 
-            {/* スケジュール入力 */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 ⏰ 投稿時刻(オプション)
@@ -123,7 +117,6 @@ export default function App() {
               <p className="text-xs text-gray-500 mt-2">日本時間で投稿時刻を指定できます</p>
             </div>
 
-            {/* 生成ボタン */}
             <button
               onClick={handleGenerate}
               disabled={loading}
@@ -148,18 +141,16 @@ export default function App() {
               )}
             </button>
 
-            {/* ステータスメッセージ */}
             {message && (
               <div className={`p-4 rounded-2xl text-center font-medium ${
-                message.includes("✅") ? "bg-green-50 text-green-700 border-2 border-green-200" :
-                message.includes("❌") || message.includes("🚨") ? "bg-red-50 text-red-700 border-2 border-red-200" :
+                message.includes("✅") || message.includes("成功") || message.includes("保存") ? "bg-green-50 text-green-700 border-2 border-green-200" :
+                message.includes("❌") || message.includes("エラー") ? "bg-red-50 text-red-700 border-2 border-red-200" :
                 "bg-blue-50 text-blue-700 border-2 border-blue-200"
               }`}>
                 {message}
               </div>
             )}
 
-            {/* 生成結果 */}
             {generatedText && (
               <div className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl p-6 border-2 border-pink-200 shadow-lg">
                 <div className="flex items-start space-x-3">
@@ -174,7 +165,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* 履歴セクション */}
         <div className="bg-white rounded-3xl shadow-2xl p-8 backdrop-blur-sm bg-opacity-95">
           <div className="flex items-center mb-6">
             <span className="text-3xl mr-3">🕊️</span>
