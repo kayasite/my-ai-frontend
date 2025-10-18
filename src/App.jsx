@@ -7,7 +7,7 @@ export default function App() {
   const [message, setMessage] = useState("");
   const [history, setHistory] = useState([]);
 
-  // 履歴取得
+  // === 履歴取得 ===
   const fetchHistory = async () => {
     try {
       const res = await fetch("https://my-ai-poster.onrender.com/api/history");
@@ -22,12 +22,13 @@ export default function App() {
     fetchHistory();
   }, []);
 
-  // 投稿処理
+  // === 投稿生成処理 ===
   const handleGenerate = async () => {
     if (!topic) {
       alert("テーマを入力してください🌸");
       return;
     }
+
     setLoading(true);
     setMessage("⏳ 生成中...");
     setGeneratedText("");
@@ -40,10 +41,11 @@ export default function App() {
       });
 
       const data = await response.json();
+
       if (data.success) {
         setGeneratedText(data.generated_text);
         setMessage("✅ Threadsに投稿＆保存しました！");
-        fetchHistory(); // ✅ 生成後に履歴を再取得
+        fetchHistory(); // ✅ 履歴再取得
       } else {
         setMessage("❌ エラーが発生しました");
       }
@@ -56,8 +58,9 @@ export default function App() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-pink-50 to-pink-100 text-gray-800 p-6">
-      <h1 className="text-3xl font-bold mb-6">🌸 AI短文ジェネレーター & Threads投稿</h1>
+      <h1 className="text-3xl font-bold mb-6">🌸 AI短文ジェネレーター & Threads自動投稿</h1>
 
+      {/* === テーマ入力欄 === */}
       <input
         type="text"
         placeholder="例: 春の桜"
@@ -66,6 +69,7 @@ export default function App() {
         className="border border-pink-300 rounded-lg px-4 py-2 w-64 mb-4 focus:ring-2 focus:ring-pink-400"
       />
 
+      {/* === 生成ボタン === */}
       <button
         onClick={handleGenerate}
         disabled={loading}
@@ -76,15 +80,17 @@ export default function App() {
         {loading ? "生成中..." : "🌸 生成して投稿"}
       </button>
 
+      {/* === ステータスメッセージ === */}
       {message && <p className="mt-4 text-lg">{message}</p>}
 
+      {/* === 生成結果 === */}
       {generatedText && (
         <div className="mt-6 bg-white shadow-md rounded-xl p-4 w-80 text-center border border-pink-100">
           <p className="text-gray-700 text-lg font-medium">{generatedText}</p>
         </div>
       )}
 
-      {/* 履歴一覧 */}
+      {/* === 履歴一覧 === */}
       <div className="mt-8 w-full max-w-md bg-white rounded-xl shadow-lg p-4 border border-pink-100">
         <h2 className="text-xl font-semibold mb-3 text-pink-600">🕊️ 投稿履歴</h2>
         {history.length === 0 ? (
