@@ -7,15 +7,25 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [history, setHistory] = useState([]);
+  const [apiError, setApiError] = useState(false);
 
   // === 履歴取得 ===
   const fetchHistory = async () => {
     try {
       const res = await fetch("https://my-ai-poster.onrender.com/api/history");
+      
+      if (!res.ok) {
+        console.warn(`履歴取得失敗: ${res.status}`);
+        setApiError(true);
+        return;
+      }
+      
       const data = await res.json();
-      setHistory(data);
+      setHistory(Array.isArray(data) ? data : []);
+      setApiError(false);
     } catch (err) {
       console.error("履歴取得エラー:", err);
+      setApiError(true);
     }
   };
 
@@ -25,8 +35,8 @@ export default function App() {
 
   // === 投稿生成処理 ===
   const handleGenerate = async () => {
-    if (!topic) {
-      alert("テーマを入力してください🌸");
+    if (!topic.trim()) {
+      setMessage("❌ テーマを入力してください");
       return;
     }
 
@@ -45,17 +55,24 @@ export default function App() {
         body: JSON.stringify(bodyData),
       });
 
+      if (!response.ok) {
+        throw new Error(`サーバーエラー: ${response.status}`);
+      }
+
       const data = await response.json();
 
       if (data.success) {
         setGeneratedText(data.generated_text);
         setMessage(data.message || "✅ Threadsに投稿＆保存しました!");
+        setTopic("");
+        setScheduleTime("");
         fetchHistory();
       } else {
-        setMessage("❌ エラーが発生しました");
+        setMessage(`❌ ${data.error || "エラーが発生しました"}`);
       }
     } catch (error) {
-      setMessage("🚨 通信エラーが発生しました");
+      console.error("投稿エラー:", error);
+      setMessage("🚨 サーバーに接続できません。しばらくしてからお試しください。");
     } finally {
       setLoading(false);
     }
@@ -95,7 +112,7 @@ export default function App() {
             {/* スケジュール入力 */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                ⏰ 投稿時刻（オプション）
+                ⏰ 投稿時刻(オプション)
               </label>
               <input
                 type="datetime-local"
@@ -164,7 +181,18 @@ export default function App() {
             <h2 className="text-2xl font-bold text-gray-800">投稿履歴</h2>
           </div>
 
-          {history.length === 0 ? (
+          {apiError ? (
+            <div className="text-center py-12">
+              <span className="text-6xl mb-4 block">⚠️</span>
+              <p className="text-gray-500 text-lg mb-2">サーバーに接続できません</p>
+              <button
+                onClick={fetchHistory}
+                className="mt-4 px-6 py-2 bg-pink-500 text-white rounded-full hover:bg-pink-600 transition-colors"
+              >
+                再試行
+              </button>
+            </div>
+          ) : history.length === 0 ? (
             <div className="text-center py-12">
               <span className="text-6xl mb-4 block">📭</span>
               <p className="text-gray-400 text-lg">まだ履歴がありません</p>
