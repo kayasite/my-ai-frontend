@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 
 export default function App() {
   const [topic, setTopic] = useState("");
+  const [scheduleTime, setScheduleTime] = useState("");
   const [generatedText, setGeneratedText] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -34,17 +35,22 @@ export default function App() {
     setGeneratedText("");
 
     try {
+      // スケジュール時刻があれば一緒に送信
+      const bodyData = scheduleTime
+        ? { topic, schedule_time: scheduleTime }
+        : { topic };
+
       const response = await fetch("https://my-ai-poster.onrender.com/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic }),
+        body: JSON.stringify(bodyData),
       });
 
       const data = await response.json();
 
       if (data.success) {
         setGeneratedText(data.generated_text);
-        setMessage("✅ Threadsに投稿＆保存しました！");
+        setMessage(data.message || "✅ Threadsに投稿＆保存しました！");
         fetchHistory(); // ✅ 履歴再取得
       } else {
         setMessage("❌ エラーが発生しました");
@@ -66,8 +72,17 @@ export default function App() {
         placeholder="例: 春の桜"
         value={topic}
         onChange={(e) => setTopic(e.target.value)}
+        className="border border-pink-300 rounded-lg px-4 py-2 w-64 mb-3 focus:ring-2 focus:ring-pink-400"
+      />
+
+      {/* === スケジュール入力欄 === */}
+      <input
+        type="datetime-local"
+        value={scheduleTime}
+        onChange={(e) => setScheduleTime(e.target.value)}
         className="border border-pink-300 rounded-lg px-4 py-2 w-64 mb-4 focus:ring-2 focus:ring-pink-400"
       />
+      <p className="text-sm text-gray-500 mb-4">⏰ ここで投稿時刻（日本時間）を指定できます</p>
 
       {/* === 生成ボタン === */}
       <button
@@ -77,7 +92,7 @@ export default function App() {
           loading ? "bg-gray-400 cursor-not-allowed" : "bg-pink-500 hover:bg-pink-600 active:bg-pink-700"
         }`}
       >
-        {loading ? "生成中..." : "🌸 生成して投稿"}
+        {loading ? "生成中..." : scheduleTime ? "📅 時間指定して投稿" : "🌸 今すぐ投稿"}
       </button>
 
       {/* === ステータスメッセージ === */}
@@ -101,6 +116,9 @@ export default function App() {
               <li key={item.id} className="border-b border-pink-100 pb-2">
                 <p className="text-sm text-gray-600">🗒 {item.topic}</p>
                 <p className="text-base text-gray-800">{item.text}</p>
+                {item.created_at && (
+                  <p className="text-xs text-gray-400">🕒 {new Date(item.created_at).toLocaleString("ja-JP")}</p>
+                )}
               </li>
             ))}
           </ul>
@@ -109,3 +127,4 @@ export default function App() {
     </div>
   );
 }
+
