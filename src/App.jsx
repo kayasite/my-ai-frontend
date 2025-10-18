@@ -1,99 +1,76 @@
 import { useState } from "react";
-import axios from "axios";
 
-function App() {
-  const [topic, setTopic] = useState("春の桜");
-  const [result, setResult] = useState("");
+export default function App() {
+  const [topic, setTopic] = useState("");
+  const [generatedText, setGeneratedText] = useState("");
   const [loading, setLoading] = useState(false);
-  const [history, setHistory] = useState([]);
+  const [message, setMessage] = useState("");
 
-  // === 短文生成 ===
   const handleGenerate = async () => {
+    if (!topic) {
+      alert("テーマを入力してください🌸");
+      return;
+    }
     setLoading(true);
-    setResult("生成中...");
+    setMessage("⏳ 生成中...");
+    setGeneratedText("");
+
     try {
-      const res = await axios.post(
-        "https://my-ai-poster.onrender.com/api/generate",
-        { topic },
-        { headers: { "Content-Type": "application/json" } }
-      );
-      setResult(res.data.generated_text);
-    } catch (err) {
-      setResult("エラーが発生しました。");
-      console.error(err);
+      const response = await fetch("https://my-ai-poster.onrender.com/api/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ topic }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setGeneratedText(data.generated_text);
+        setMessage("✅ Threadsに投稿しました！");
+      } else {
+        setMessage("❌ エラーが発生しました: " + (data.error || "不明なエラー"));
+      }
+    } catch (error) {
+      console.error(error);
+      setMessage("🚨 通信エラーが発生しました");
     } finally {
       setLoading(false);
     }
   };
 
-  // === 履歴取得 ===
-  const handleLoadHistory = async () => {
-    try {
-      const res = await axios.get("https://my-ai-poster.onrender.com/api/history");
-      setHistory(res.data);
-    } catch (err) {
-      console.error("履歴取得エラー:", err);
-    }
-  };
-
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-pink-100 to-purple-200 text-gray-800">
-      <h1 className="text-3xl font-bold mb-4 text-pink-700">🌸 AI短文ジェネレーター</h1>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-pink-50 to-pink-100 text-gray-800 p-6">
+      <h1 className="text-3xl font-bold mb-6">🌸 AI短文ジェネレーター & Threads投稿</h1>
 
-      {/* 入力フォーム */}
       <input
+        type="text"
+        placeholder="例: 春の桜"
         value={topic}
         onChange={(e) => setTopic(e.target.value)}
-        className="border rounded-lg p-2 w-64 text-center shadow"
-        placeholder="テーマを入力（例：春の桜）"
+        className="border border-pink-300 rounded-lg px-4 py-2 w-64 mb-4 focus:ring-2 focus:ring-pink-400"
       />
 
-      {/* ボタン群 */}
-      <div className="flex space-x-3 mt-4">
-        <button
-          onClick={handleGenerate}
-          disabled={loading}
-          className="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-lg shadow-lg disabled:opacity-50"
-        >
-          {loading ? "生成中..." : "生成する"}
-        </button>
+      <button
+        onClick={handleGenerate}
+        disabled={loading}
+        className={`px-6 py-2 rounded-lg text-white font-semibold shadow-md transition-all ${
+          loading
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-pink-500 hover:bg-pink-600 active:bg-pink-700"
+        }`}
+      >
+        {loading ? "生成中..." : "🌸 生成して投稿"}
+      </button>
 
-        <button
-          onClick={handleLoadHistory}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg"
-        >
-          履歴を表示
-        </button>
-      </div>
+      {message && <p className="mt-4 text-lg">{message}</p>}
 
-      {/* 結果表示 */}
-      {result && (
-        <div className="mt-6 bg-white rounded-lg shadow p-4 w-80 text-center">
-          <p className="text-lg">{result}</p>
-        </div>
-      )}
-
-      {/* 履歴一覧 */}
-      {history.length > 0 && (
-        <div className="mt-10 w-80">
-          <h2 className="font-bold text-lg mb-2">🕒 過去の生成履歴</h2>
-          <ul className="space-y-2">
-            {history.map((item) => (
-              <li
-                key={item.id}
-                className="bg-white rounded-lg p-3 shadow-sm hover:shadow-md transition"
-              >
-                <p className="text-sm text-gray-500">{item.topic}</p>
-                <p className="text-gray-800 font-medium">{item.text}</p>
-              </li>
-            ))}
-          </ul>
+      {generatedText && (
+        <div className="mt-6 bg-white shadow-md rounded-xl p-4 w-80 text-center border border-pink-100">
+          <p className="text-gray-700 text-lg font-medium">{generatedText}</p>
         </div>
       )}
     </div>
   );
 }
-
-export default App;
-
-
