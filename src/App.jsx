@@ -1,37 +1,57 @@
 import { useState, useEffect } from "react";
+import LoginForm from "./LoginForm";
 
 export default function App() {
+  const API_BASE = "https://my-ai-poster.onrender.com";
+
+  // 認証
+  const [user, setUser] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  // 既存機能
   const [topic, setTopic] = useState("");
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
   const [accounts, setAccounts] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   const [newAccount, setNewAccount] = useState({ name: "", user_id: "", access_token: "" });
-  const API_BASE = "https://my-ai-poster.onrender.com";
 
-  // === アカウント一覧取得 ===
+  // 起動時：ログイン状態チェック
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/check_login`, { credentials: "include" });
+        const data = await res.json();
+        if (data.logged_in) setUser(data.user || "user");
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setAuthChecked(true);
+      }
+    })();
+  }, []);
+
+  // ログイン後にアカウント取得
+  useEffect(() => {
+    if (!user) return;
+    fetchAccounts();
+  }, [user]);
+
   const fetchAccounts = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/accounts/list`);
+      const res = await fetch(`${API_BASE}/api/accounts/list`, { credentials: "include" });
       const data = await res.json();
       if (data.success) setAccounts(data.accounts);
+      else if (res.status === 403) setUser(null); // 未ログインならログイン画面へ
     } catch (err) {
       console.error("アカウント取得エラー:", err);
     }
   };
 
-  useEffect(() => {
-    fetchAccounts();
-  }, []);
-
-  // === アカウント選択 ===
   const toggleAccount = (id) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   };
 
-  // === アカウント追加 ===
   const handleAddAccount = async () => {
     const { name, user_id, access_token } = newAccount;
     if (!name || !user_id || !access_token) {
@@ -42,6 +62,7 @@ export default function App() {
       const res = await fetch(`${API_BASE}/api/accounts/add`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(newAccount),
       });
       const data = await res.json();
@@ -49,7 +70,7 @@ export default function App() {
         setNewAccount({ name: "", user_id: "", access_token: "" });
         fetchAccounts();
       } else {
-        alert("追加に失敗しました");
+        alert(data.error || "追加に失敗しました");
       }
     } catch (err) {
       console.error(err);
@@ -57,48 +78,41 @@ export default function App() {
     }
   };
 
-  // === アカウント削除 ===
   const handleDeleteAccount = async (id) => {
     if (!window.confirm("このアカウントを削除しますか？")) return;
     try {
       const res = await fetch(`${API_BASE}/api/accounts/delete/${id}`, {
         method: "DELETE",
+        credentials: "include",
       });
       const data = await res.json();
       if (data.success) fetchAccounts();
+      else if (res.status === 403) setUser(null);
     } catch (err) {
       console.error(err);
     }
   };
 
-  // === 下書き生成 ===
   const handleGenerate = async () => {
-    if (!topic) {
-      alert("テーマを入力してください！");
-      return;
-    }
-    if (selectedIds.length === 0) {
-      alert("少なくとも1つのアカウントを選択してください！");
-      return;
-    }
+    if (!topic) return alert("テーマを入力してください！");
+    if (selectedIds.length === 0) return alert("少なくとも1つのアカウントを選択してください！");
 
     setLoading(true);
     setResult("生成中...");
-
     try {
       const res = await fetch(`${API_BASE}/api/generate_draft`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ topic, account_ids: selectedIds }),
       });
       const data = await res.json();
       if (data.success) {
-        const results = data.results.map(
-          (r) => `✅ ${r.account}: ${r.text}`
-        );
-        setResult(results.join("\n"));
+        const results = (data.results || []).map((r) => `✅ ${r.account}: ${r.text}`);
+        setResult(results.join("\n") || "（結果なし）");
       } else {
         setResult("❌ 生成失敗: " + (data.error || "不明なエラー"));
+        if (res.status === 403) setUser(null);
       }
     } catch (err) {
       console.error(err);
@@ -108,71 +122,104 @@ export default function App() {
     }
   };
 
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-pink-50 to-pink-100 p-6">
-      <h1 className="text-3xl font-bold text-pink-600 mb-6">👥 Threadsアカウント管理＋下書き生成</h1>
+  const handleLogout = async () => {
+    try {
+      await fetch(`${API_BASE}/api/logout`, { method: "POST", credentials: "include" });
+    } finally {
+      setUser(null);
+      setSelectedIds([]);
+      setAccounts([]);
+    }
+  };
 
-      {/* === アカウント追加フォーム === */}
-      <div className="bg-white shadow-lg rounded-xl p-6 border border-pink-200 w-full max-w-md mb-6">
+  // 認証チェック完了前は何も出さない
+  if (!authChecked) return null;
+
+  // 未ログイン → ログインフォーム
+  if (!user) return <LoginForm onSuccess={setUser} />;
+
+  // ログイン後UI
+  return (
+    <div className="flex flex-col items-center min-h-screen bg-gradient-to-b from-pink-50 to-pink-100 p-6">
+      <header className="w-full max-w-3xl flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-pink-600">👥 Threadsアカウント管理＋下書き生成</h1>
+        <div className="flex items-center gap-3">
+          <span className="text-gray-700">ようこそ、{user} さん</span>
+          <button
+            onClick={handleLogout}
+            className="text-sm bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded-md"
+          >
+            ログアウト
+          </button>
+        </div>
+      </header>
+
+      {/* アカウント追加 */}
+      <div className="bg-white shadow-lg rounded-xl p-6 border border-pink-200 w-full max-w-3xl mb-6">
         <h2 className="text-lg font-semibold mb-2 text-gray-700">➕ アカウント追加</h2>
-        <input
-          type="text"
-          placeholder="アカウント名"
-          value={newAccount.name}
-          onChange={(e) => setNewAccount({ ...newAccount, name: e.target.value })}
-          className="border border-pink-300 rounded-lg px-3 py-2 w-full mb-2"
-        />
-        <input
-          type="text"
-          placeholder="user_id"
-          value={newAccount.user_id}
-          onChange={(e) => setNewAccount({ ...newAccount, user_id: e.target.value })}
-          className="border border-pink-300 rounded-lg px-3 py-2 w-full mb-2"
-        />
-        <input
-          type="text"
-          placeholder="access_token"
-          value={newAccount.access_token}
-          onChange={(e) => setNewAccount({ ...newAccount, access_token: e.target.value })}
-          className="border border-pink-300 rounded-lg px-3 py-2 w-full mb-3"
-        />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <input
+            type="text"
+            placeholder="アカウント名"
+            value={newAccount.name}
+            onChange={(e) => setNewAccount({ ...newAccount, name: e.target.value })}
+            className="border border-pink-300 rounded-lg px-3 py-2 w-full"
+          />
+          <input
+            type="text"
+            placeholder="user_id"
+            value={newAccount.user_id}
+            onChange={(e) => setNewAccount({ ...newAccount, user_id: e.target.value })}
+            className="border border-pink-300 rounded-lg px-3 py-2 w-full"
+          />
+          <input
+            type="text"
+            placeholder="access_token"
+            value={newAccount.access_token}
+            onChange={(e) => setNewAccount({ ...newAccount, access_token: e.target.value })}
+            className="border border-pink-300 rounded-lg px-3 py-2 w-full"
+          />
+        </div>
         <button
           onClick={handleAddAccount}
-          className="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-lg w-full font-semibold"
+          className="mt-3 bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-lg font-semibold"
         >
           追加する
         </button>
       </div>
 
-      {/* === アカウント一覧 === */}
-      <div className="bg-white shadow-lg rounded-xl p-6 border border-pink-200 w-full max-w-md mb-6">
+      {/* アカウント一覧 */}
+      <div className="bg-white shadow-lg rounded-xl p-6 border border-pink-200 w-full max-w-3xl mb-6">
         <h2 className="text-lg font-semibold mb-2 text-gray-700">👤 登録済みアカウント</h2>
         {accounts.length === 0 ? (
           <p className="text-gray-500">まだアカウントがありません。</p>
         ) : (
-          accounts.map((acc) => (
-            <div key={acc.id} className="flex justify-between items-center border-b py-2">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={selectedIds.includes(acc.id)}
-                  onChange={() => toggleAccount(acc.id)}
-                />
-                <span>{acc.name}</span>
-              </label>
-              <button
-                onClick={() => handleDeleteAccount(acc.id)}
-                className="text-red-500 hover:text-red-700 text-sm"
-              >
-                削除
-              </button>
-            </div>
-          ))
+          <div className="space-y-1">
+            {accounts.map((acc) => (
+              <div key={acc.id} className="flex justify-between items-center border-b py-2">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.includes(acc.id)}
+                    onChange={() => toggleAccount(acc.id)}
+                  />
+                  <span>{acc.name}</span>
+                </label>
+                <button
+                  onClick={() => handleDeleteAccount(acc.id)}
+                  className="text-red-500 hover:text-red-700 text-sm"
+                >
+                  削除
+                </button>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
-      {/* === 下書き生成 === */}
-      <div className="bg-white shadow-lg rounded-xl p-6 border border-pink-200 w-full max-w-md">
+      {/* 下書き生成 */}
+      <div className="bg-white shadow-lg rounded-xl p-6 border border-pink-200 w-full max-w-3xl">
+        <h2 className="text-lg font-semibold mb-2 text-gray-700">📝 下書き生成</h2>
         <input
           type="text"
           placeholder="例: 秋の北海道旅行"
@@ -189,15 +236,13 @@ export default function App() {
         >
           {loading ? "生成中..." : "✨ 下書きを作成"}
         </button>
-      </div>
 
-      {result && (
-        <div className="mt-6 bg-white p-4 rounded-lg shadow-md border border-pink-200 max-w-md text-gray-700 whitespace-pre-line">
-          <p>{result}</p>
-        </div>
-      )}
+        {result && (
+          <div className="mt-4 bg-gray-50 p-4 rounded-lg border text-gray-800 whitespace-pre-line">
+            {result}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
-
-
