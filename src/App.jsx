@@ -1,5 +1,20 @@
 import React, { useState } from 'react';
-import { Calendar, Send, Sparkles, Clock, CheckCircle, XCircle, User, Plus, BarChart3, Edit, Trash2, Save, Copy, Wand2 } from 'lucide-react';
+
+// SVGアイコンコンポーネント
+const Calendar = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>;
+const Send = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>;
+const Sparkles = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>;
+const Clock = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
+const CheckCircle = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>;
+const XCircle = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>;
+const User = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
+const Plus = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
+const BarChart3 = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><line x1="12" y1="3" x2="12" y2="15"/><line x1="19" y1="6" x2="19" y2="15"/><line x1="5" y1="9" x2="5" y2="15"/></svg>;
+const Edit = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>;
+const Trash2 = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>;
+const Save = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>;
+const Copy = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>;
+const Wand2 = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><path d="M12 3v7m0 0L4.22 2.22M12 10v7m0 0l7.78 7.78M3 21h18"/></svg>;
 
 export default function ThreadsAutoPostSystem() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -22,14 +37,14 @@ export default function ThreadsAutoPostSystem() {
       id: 1, 
       accountId: null, 
       name: 'テクノロジーニュース',
-      prompt: '最新のAIやプログラミングに関する興味深いトピックについて、140文字以内でわかりやすく投稿を作成してください。技術的な内容を一般の人にも理解できるように説明し、フレンドリーなトーンで書いてください。',
+      prompt: '最新のAIやプログラミングに関する興味深いトピックについて、140文字以内であかりやすく投稿を作成してください。技術的な内容を一般の人にも理解できるように説明し、フレンドリーなトーンで書いてください。',
       enabled: true
     },
     { 
       id: 2, 
       accountId: null, 
       name: '開発者向けTips',
-      prompt: 'プログラミングやコーディングに関する実用的なTipsを1つ紹介してください。具体例を含めて、初心者にもわかりやすく140文字以内で説明してください。',
+      prompt: 'プログラミングやコーディングに関する実用的なTipsを1つ紹介してください。具体例を含めて、初心者にもあかりやすく140文字以内で説明してください。',
       enabled: true
     },
     { 
@@ -89,12 +104,12 @@ export default function ThreadsAutoPostSystem() {
     },
     {
       name: '📚 学び・成長投稿',
-      prompt: '最近学んだことや成長につながる気づきを、初心者にもわかりやすく140文字以内で共有してください。専門用語は使わず、誰でも実践できるような内容にしてください。',
+      prompt: '最近学んだことや成長につながる気づきを、初心者にもあかりやすく140文字以内で共有してください。専門用語は使わず、誰でも実践できるような内容にしてください。',
       category: '自己啓発'
     },
     {
       name: '💻 テクノロジートレンド',
-      prompt: '最新のテクノロジーやデジタルツールのトレンドについて、一般の人にもわかりやすく140文字以内で解説してください。難しい技術を日常の言葉で説明し、どう役立つかを明確にしてください。',
+      prompt: '最新のテクノロジーやデジタルツールのトレンドについて、一般の人にもあかりやすく140文字以内で解説してください。難しい技術を日常の言葉で説明し、どう役立つかを明確にしてください。',
       category: 'テック'
     },
     {
@@ -109,7 +124,7 @@ export default function ThreadsAutoPostSystem() {
     },
     {
       name: '📊 データ・統計引用',
-      prompt: '興味深い統計データや調査結果を引用し、その意味や実生活への影響を140文字以内でわかりやすく解説してください。数字を使いながらも、親しみやすい表現を心がけてください。',
+      prompt: '興味深い統計データや調査結果を引用し、その意味や実生活への影響を140文字以内であかりやすく解説してください。数字を使いながらも、親しみやすい表現を心がけてください。',
       category: '情報共有'
     },
     {
@@ -184,9 +199,9 @@ export default function ThreadsAutoPostSystem() {
     
     setTimeout(() => {
       const sampleResponses = [
-        'AIと人間の協働が新しい時代を創る。技術は道具であり、それを使いこなす私たちの創造性こそが未来を形作ります。',
+        'AIと人間の協働が新しい時代を創る。技術は道具であり、それを使いこなす私たちの創造性ごとが未来を形作ります。',
         'プログラミング学習のコツ: 完璧を目指さず、まず動くものを作る。そこから改善していくプロセスが最も学びになります。',
-        'デバッグの極意: エラーメッセージを怖れずに読む。そこに答えが必ず隠されています。',
+        'デバッグの極意: エラーメッセージを恐れずに読む。そこに答えが必ず隠されています。',
         '朝の30分で1日が変わる。スマホを見る前に、今日の目標を3つ書き出してみよう。',
         '生産性を上げる秘訣: マルチタスクをやめ、1つのことに集中する時間を作ることです。',
         'コードは詩のように美しくあるべき。シンプルで読みやすいコードが、後のあなたを助けます。',
@@ -298,12 +313,6 @@ export default function ThreadsAutoPostSystem() {
     showSuccessMessage('スケジュールを削除しました');
   };
 
-  const schedulePost = (postId, time) => {
-    setPosts(posts.map(post => 
-      post.id === postId ? { ...post, status: 'scheduled', scheduledTime: time } : post
-    ));
-  };
-
   const deletePost = (id) => {
     setPosts(posts.filter(p => p.id !== id));
     showSuccessMessage('投稿を削除しました');
@@ -326,6 +335,13 @@ export default function ThreadsAutoPostSystem() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4 md:p-8">
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
+      `}</style>
       <div className="max-w-6xl mx-auto">
         {successMessage && (
           <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-fade-in">
@@ -761,7 +777,7 @@ export default function ThreadsAutoPostSystem() {
                   <textarea
                     value={promptContent}
                     onChange={(e) => setPromptContent(e.target.value)}
-                    placeholder="例: 最新のAI技術について、一般の人にもわかりやすく140文字以内で説明してください。フレンドリーなトーンで、具体例を1つ含めてください。"
+                    placeholder="例: 最新のAI技術について、一般の人にもあかりやすく140文字以内で説明してください。フレンドリーなトーン で、具体例を1つ含めてください。"
                     rows={5}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
                   />
@@ -893,9 +909,9 @@ export default function ThreadsAutoPostSystem() {
             <strong>⏰ スケジュール機能:</strong> 各スケジュールに投稿時刻とプロンプトを設定できます。設定した時刻に自動的にAIが投稿を生成して投稿します。
           </p>
           <p className="text-sm text-gray-700">
-            <strong>🔐 Threads API設定:</strong> アカウント追加時には、Meta Developer Platformから取得した<strong>Threads ID</strong>と<strong>アクセストークン</strong>が必要です。
+            <strong>📝 Threads API設定:</strong> アカウント追加時には、Meta Developer Platformから取得した<strong>Threads ID</strong>と<strong>アクセストークン</strong>が必要です。
             詳細は <a href="https://developers.facebook.com/docs/threads" target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:underline">Threads API ドキュメント</a> をご覧ください。
-            実際の運用にはバックエンド(Node.js + OpenAI API + Threads API)の実装が必要です。
+            実際の運用には、バックエンド(Node.js + OpenAI API + Threads API)の実装が必要です。
           </p>
         </div>
       </div>
