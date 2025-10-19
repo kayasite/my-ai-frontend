@@ -201,7 +201,7 @@ export default function ThreadsAutoPostSystem() {
       const sampleResponses = [
         'AIと人間の協働が新しい時代を創る。技術は道具であり、それを使いこなす私たちの創造性ごとが未来を形作ります。',
         'プログラミング学習のコツ: 完璧を目指さず、まず動くものを作る。そこから改善していくプロセスが最も学びになります。',
-        'デバッグの極意: エラーメッセージを恐れずに読む。そこに答えが必ず隠されています。',
+        'デバッグの極意: エラーメッセージを怖れずに読む。そこに答えが必ず隠されています。',
         '朝の30分で1日が変わる。スマホを見る前に、今日の目標を3つ書き出してみよう。',
         '生産性を上げる秘訣: マルチタスクをやめ、1つのことに集中する時間を作ることです。',
         'コードは詩のように美しくあるべき。シンプルで読みやすいコードが、後のあなたを助けます。',
@@ -334,7 +334,7 @@ export default function ThreadsAutoPostSystem() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 p-4 md:p-8">
       <style>{`
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(-10px); }
@@ -352,7 +352,7 @@ export default function ThreadsAutoPostSystem() {
 
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
           <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-3 rounded-xl">
+            <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-3 rounded-xl">
               <Sparkles className="text-white" size={28} />
             </div>
             <div>
@@ -375,7 +375,7 @@ export default function ThreadsAutoPostSystem() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition whitespace-nowrap ${
                   activeTab === tab.id
-                    ? 'bg-purple-500 text-white'
+                    ? 'bg-blue-500 text-white'
                     : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
@@ -396,7 +396,7 @@ export default function ThreadsAutoPostSystem() {
                 </div>
                 <div className="text-3xl font-bold">{posts.filter(p => p.status === 'scheduled').length}</div>
               </div>
-              <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 text-white">
+              <div className="bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl p-6 text-white">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm opacity-90">アクティブスケジュール</span>
                   <Sparkles size={24} />
@@ -414,7 +414,7 @@ export default function ThreadsAutoPostSystem() {
                 <h3 className="text-xl font-bold text-gray-800">Threadsアカウント</h3>
                 <button 
                   onClick={() => setShowAddAccount(!showAddAccount)}
-                  className="flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition"
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
                 >
                   <Plus size={18} />
                   アカウント追加
@@ -422,7 +422,7 @@ export default function ThreadsAutoPostSystem() {
               </div>
 
               {showAddAccount && (
-                <div className="mb-6 p-6 bg-purple-50 rounded-xl border border-purple-200">
+                <div className="mb-6 p-6 bg-blue-50 rounded-xl border border-blue-200">
                   <h4 className="font-semibold text-gray-800 mb-4">新しいアカウントを追加</h4>
                   <div className="space-y-4">
                     <div>
@@ -432,7 +432,7 @@ export default function ThreadsAutoPostSystem() {
                         value={accountUsername}
                         onChange={(e) => setAccountUsername(e.target.value)}
                         placeholder="@username"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
                     <div>
@@ -442,7 +442,7 @@ export default function ThreadsAutoPostSystem() {
                         value={accountThreadsId}
                         onChange={(e) => setAccountThreadsId(e.target.value)}
                         placeholder="1234567890"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
                     <div>
@@ -452,14 +452,14 @@ export default function ThreadsAutoPostSystem() {
                         onChange={(e) => setAccountAccessToken(e.target.value)}
                         placeholder="EAAxxxxxxxxxxxxxxxxx..."
                         rows={3}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                       />
                       <p className="text-xs text-gray-500 mt-1">Meta Developer Platformから取得したアクセストークンを入力してください</p>
                     </div>
                     <div className="flex gap-3">
                       <button
                         onClick={addAccount}
-                        className="flex-1 px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition font-medium"
+                        className="flex-1 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-medium"
                       >
                         追加
                       </button>
@@ -479,7 +479,7 @@ export default function ThreadsAutoPostSystem() {
                   const accountSchedules = schedules.filter(s => s.accountId === account.id);
                   
                   return (
-                    <div key={account.id} className="p-6 border-2 border-gray-200 rounded-xl hover:border-purple-300 transition">
+                    <div key={account.id} className="p-6 border-2 border-blue-200 rounded-xl hover:border-blue-400 transition">
                       {editingAccount === account.id ? (
                         <div className="space-y-4">
                           <h4 className="font-semibold text-gray-800 mb-4">アカウント編集</h4>
@@ -489,7 +489,7 @@ export default function ThreadsAutoPostSystem() {
                               type="text"
                               value={editAccountUsername}
                               onChange={(e) => setEditAccountUsername(e.target.value)}
-                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                           </div>
                           <div>
@@ -498,7 +498,7 @@ export default function ThreadsAutoPostSystem() {
                               type="text"
                               value={editAccountThreadsId}
                               onChange={(e) => setEditAccountThreadsId(e.target.value)}
-                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                           </div>
                           <div>
@@ -507,7 +507,7 @@ export default function ThreadsAutoPostSystem() {
                               value={editAccountAccessToken}
                               onChange={(e) => setEditAccountAccessToken(e.target.value)}
                               rows={3}
-                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                             />
                           </div>
                           <div className="flex gap-3">
@@ -530,7 +530,7 @@ export default function ThreadsAutoPostSystem() {
                         <>
                           <div className="flex items-start justify-between mb-4">
                             <div className="flex items-center gap-4">
-                              <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                              <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-full flex items-center justify-center text-white font-bold text-xl">
                                 {account.username.slice(1, 3).toUpperCase()}
                               </div>
                               <div>
@@ -540,14 +540,14 @@ export default function ThreadsAutoPostSystem() {
                                     <span className="font-medium">Threads ID:</span> {account.threadsId}
                                   </p>
                                   <p className="text-xs text-gray-500">
-                                    <span className="font-medium">トークン:</span> {account.accessToken.slice(0, 10)}...•••••••
+                                    <span className="font-medium">トークン:</span> {account.accessToken.slice(0, 10)}...••••••••
                                   </p>
                                 </div>
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
                               <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                account.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                                account.status === 'active' ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-700'
                               }`}>
                                 {account.status === 'active' ? 'アクティブ' : '無効'}
                               </span>
@@ -675,7 +675,7 @@ export default function ThreadsAutoPostSystem() {
                                                 onClick={() => toggleSchedule(schedule.id)}
                                                 className={`px-3 py-1 rounded-full text-xs font-medium transition ${
                                                   schedule.enabled 
-                                                    ? 'bg-green-100 text-green-700 hover:bg-green-200' 
+                                                    ? 'bg-cyan-100 text-cyan-700 hover:bg-cyan-200' 
                                                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                                 }`}
                                               >
@@ -723,30 +723,30 @@ export default function ThreadsAutoPostSystem() {
                 className="w-full flex items-center justify-between p-4 hover:bg-gray-50 rounded-lg transition mb-4"
               >
                 <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                  <Wand2 size={24} className="text-purple-500" />
+                  <Wand2 size={24} className="text-blue-500" />
                   プロンプトテンプレート
                 </h3>
-                <span className="text-lg text-purple-600">
+                <span className="text-lg text-blue-600">
                   {showTemplates ? '▼' : '▶'}
                 </span>
               </button>
               {showTemplates && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {promptTemplates.map((template, idx) => (
-                    <div key={idx} className="p-5 border-2 border-gray-200 rounded-xl hover:border-purple-300 transition bg-gradient-to-br from-white to-purple-50">
+                    <div key={idx} className="p-5 border-2 border-blue-200 rounded-xl hover:border-blue-400 transition bg-gradient-to-br from-white to-blue-50">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
                           <h4 className="font-bold text-gray-800 text-base mb-1">{template.name}</h4>
-                          <span className="inline-block px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium mb-2">
+                          <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium mb-2">
                             {template.category}
                           </span>
                         </div>
                         <button
                           onClick={() => useTemplate(template)}
-                          className="p-2 hover:bg-purple-100 rounded-lg transition flex-shrink-0"
+                          className="p-2 hover:bg-blue-100 rounded-lg transition flex-shrink-0"
                           title="このテンプレートを使用"
                         >
-                          <Copy size={18} className="text-purple-500" />
+                          <Copy size={18} className="text-blue-500" />
                         </button>
                       </div>
                       <p className="text-sm text-gray-700 leading-relaxed">{template.prompt}</p>
@@ -766,7 +766,7 @@ export default function ThreadsAutoPostSystem() {
                     value={promptName}
                     onChange={(e) => setPromptName(e.target.value)}
                     placeholder="例: テクノロジーニュース"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 <div>
@@ -777,18 +777,18 @@ export default function ThreadsAutoPostSystem() {
                   <textarea
                     value={promptContent}
                     onChange={(e) => setPromptContent(e.target.value)}
-                    placeholder="例: 最新のAI技術について、一般の人にもあかりやすく140文字以内で説明してください。フレンドリーなトーン で、具体例を1つ含めてください。"
+                    placeholder="例: 最新のAI技術について、一般の人にもあかりやすく140文字以内で説明してください。フレンドリーなトーンで、具体例を1つ含めてください。"
                     rows={5}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    💡 ヒント: 文字数制限、トーン、含めて欲しい要素を明確に指定するとよい結果が得られます
+                    💡 ヒント: 文字数制限、トーン、含めて欲しい要素を明確に指定するといい結果が得られます
                   </p>
                 </div>
                 <button
                   onClick={addPrompt}
                   disabled={!promptName || !promptContent}
-                  className="w-full py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg hover:shadow-lg transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:shadow-lg transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   プロンプトを追加
                 </button>
@@ -800,7 +800,7 @@ export default function ThreadsAutoPostSystem() {
               <div className="space-y-4">
                 {prompts.map(prompt => (
                   <div key={prompt.id} className={`p-4 border-2 rounded-xl transition ${
-                    prompt.enabled ? 'border-purple-200 bg-purple-50' : 'border-gray-200 bg-gray-50'
+                    prompt.enabled ? 'border-blue-200 bg-blue-50' : 'border-gray-200 bg-gray-50'
                   }`}>
                     {editingPrompt === prompt.id ? (
                       <div className="space-y-3">
@@ -874,11 +874,11 @@ export default function ThreadsAutoPostSystem() {
               <div className="space-y-4">
                 {posts.filter(post => post.status === 'posted').length > 0 ? (
                   posts.filter(post => post.status === 'posted').map(post => (
-                    <div key={post.id} className="p-4 border border-gray-200 rounded-xl bg-gradient-to-r from-white to-green-50">
+                    <div key={post.id} className="p-4 border border-blue-200 rounded-xl bg-gradient-to-r from-white to-cyan-50">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-sm font-semibold text-purple-600">{getAccountUsername(post.accountId)}</span>
-                          <span className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded">{post.promptName}</span>
+                          <span className="text-sm font-semibold text-blue-600">{getAccountUsername(post.accountId)}</span>
+                          <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded">{post.promptName}</span>
                           <span className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded text-xs">
                             <CheckCircle size={14} />
                             投稿済み {post.postedAt}
@@ -901,16 +901,16 @@ export default function ThreadsAutoPostSystem() {
           </div>
         )}
 
-        <div className="mt-6 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-xl p-4">
+        <div className="mt-6 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-xl p-4">
           <p className="text-sm text-gray-700 mb-2">
-            <strong>💡 プロンプトのコツ:</strong> 具体的な指示(文字数、トーン、含める要素)を書くと、よい投稿が生成されます。
+            <strong>💡 プロンプトのコツ:</strong> 具体的な指示(文字数、トーン、含める要素)を書くと、いい投稿が生成されます。
           </p>
           <p className="text-sm text-gray-700 mb-2">
             <strong>⏰ スケジュール機能:</strong> 各スケジュールに投稿時刻とプロンプトを設定できます。設定した時刻に自動的にAIが投稿を生成して投稿します。
           </p>
           <p className="text-sm text-gray-700">
-            <strong>📝 Threads API設定:</strong> アカウント追加時には、Meta Developer Platformから取得した<strong>Threads ID</strong>と<strong>アクセストークン</strong>が必要です。
-            詳細は <a href="https://developers.facebook.com/docs/threads" target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:underline">Threads API ドキュメント</a> をご覧ください。
+            <strong>🔐 Threads API設定:</strong> アカウント追加時には、Meta Developer Platformから取得した<strong>Threads ID</strong>と<strong>アクセストークン</strong>が必要です。
+            詳細は <a href="https://developers.facebook.com/docs/threads" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Threads API ドキュメント</a> をご覧ください。
             実際の運用には、バックエンド(Node.js + OpenAI API + Threads API)の実装が必要です。
           </p>
         </div>
