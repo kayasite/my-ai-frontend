@@ -1,15 +1,18 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
+  content: [
+    "./index.html",
+    "./src/**/*.{js,jsx,ts,tsx}"
+  ],
   theme: {
     extend: {
       colors: {
-        sakura1: "#ffe4e9",
-        sakura2: "#ffd6e0",
-        sakura3: "#ffc2d4",
+        sakura1: "#fff5f8",
+        sakura2: "#ffe4eb",
+        sakura3: "#ffd4e3",
       },
       backgroundImage: {
-        "sakura-gradient": "linear-gradient(to bottom right, #ffe4e9, #ffd6e0, #fff)",
+        "sakura-gradient": "linear-gradient(to bottom right, #fff5f8, #ffe4eb, #ffffff)",
       },
       fontFamily: {
         jp: ['"Noto Sans JP"', "sans-serif"],
@@ -18,5 +21,4 @@ export default {
   },
   plugins: [],
 };
-
 
