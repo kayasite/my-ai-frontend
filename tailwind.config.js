@@ -4,22 +4,19 @@ export default {
   theme: {
     extend: {
       colors: {
-        sakura: {
-          light: "#ffe4ec",
-          DEFAULT: "#ffb7c5",
-          dark: "#e17b93",
-        },
-        ink: "#1e1e2f",
-      },
-      fontFamily: {
-        jp: ["'Noto Sans JP'", "sans-serif"],
+        sakura1: "#ffe4e9",
+        sakura2: "#ffd6e0",
+        sakura3: "#ffc2d4",
       },
       backgroundImage: {
-        "sakura-gradient":
-          "linear-gradient(to bottom right, #fff5f7, #ffe4ec, #fdf2f8)",
+        "sakura-gradient": "linear-gradient(to bottom right, #ffe4e9, #ffd6e0, #fff)",
+      },
+      fontFamily: {
+        jp: ['"Noto Sans JP"', "sans-serif"],
       },
     },
   },
   plugins: [],
 };
+
 
