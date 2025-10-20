@@ -14,8 +14,16 @@ const Trash2 = ({ size = 24, className = "" }) => <svg width={size} height={size
 const Save = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>;
 const Copy = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>;
 const Wand2 = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><path d="M12 3v7m0 0L4.22 2.22M12 10v7m0 0l7.78 7.78M3 21h18"/></svg>;
+const LogOut = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>;
+const Lock = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>;
 
 export default function ThreadsAutoPostSystem() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [currentUser, setCurrentUser] = useState(null);
+
   const [activeTab, setActiveTab] = useState('dashboard');
   
   const [accounts, setAccounts] = useState([
@@ -36,14 +44,14 @@ export default function ThreadsAutoPostSystem() {
       id: 1, 
       accountId: null, 
       name: 'テクノロジーニュース',
-      prompt: '最新のAIやプログラミングに関する興味深いトピックについて、140文字以内であかりやすく投稿を作成してください。技術的な内容を一般の人にも理解できるように説明し、フレンドリーなトーンで書いてください。',
+      prompt: '最新のAIやプログラミングに関する興味深いトピックについて、140文字以内でわかりやすく投稿を作成してください。技術的な内容を一般の人にも理解できるように説明し、フレンドリーなトーンで書いてください。',
       enabled: true
     },
     { 
       id: 2, 
       accountId: null, 
       name: '開発者向けTips',
-      prompt: 'プログラミングやコーディングに関する実用的なTipsを1つ紹介してください。具体例を含めて、初心者にもあかりやすく140文字以内で説明してください。',
+      prompt: 'プログラミングやコーディングに関する実用的なTipsを1つ紹介してください。具体例を含めて、初心者にもわかりやすく140文字以内で説明してください。',
       enabled: true
     },
     { 
@@ -103,12 +111,12 @@ export default function ThreadsAutoPostSystem() {
     },
     {
       name: '📚 学び・成長投稿',
-      prompt: '最近学んだことや成長につながる気づきを、初心者にもあかりやすく140文字以内で共有してください。専門用語は使わず、誰でも実践できるような内容にしてください。',
+      prompt: '最近学んだことや成長につながる気づきを、初心者にもわかりやすく140文字以内で共有してください。専門用語は使わず、誰でも実践できるような内容にしてください。',
       category: '自己啓発'
     },
     {
       name: '💻 テクノロジートレンド',
-      prompt: '最新のテクノロジーやデジタルツールのトレンドについて、一般の人にもあかりやすく140文字以内で解説してください。難しい技術を日常の言葉で説明し、どう役立つかを明確にしてください。',
+      prompt: '最新のテクノロジーやデジタルツールのトレンドについて、一般の人にもわかりやすく140文字以内で解説してください。難しい技術を日常の言葉で説明し、どう役立つかを明確にしてください。',
       category: 'テック'
     },
     {
@@ -123,7 +131,7 @@ export default function ThreadsAutoPostSystem() {
     },
     {
       name: '📊 データ・統計引用',
-      prompt: '興味深い統計データや調査結果を引用し、その意味や実生活への影響を140文字以内であかりやすく解説してください。数字を使いながらも、親しみやすい表現を心がけてください。',
+      prompt: '興味深い統計データや調査結果を引用し、その意味や実生活への影響を140文字以内でわかりやすく解説してください。数字を使いながらも、親しみやすい表現を心がけてください。',
       category: '情報共有'
     },
     {
@@ -132,6 +140,29 @@ export default function ThreadsAutoPostSystem() {
       category: 'ストーリー'
     },
   ];
+
+  const handleLogin = () => {
+    setLoginError('');
+
+    // デモ用の認証（実際のアプリケーションでは、サーバー側で認証を行う）
+    if (loginEmail === 'demo@example.com' && loginPassword === 'demo1234') {
+      setIsLoggedIn(true);
+      setCurrentUser({
+        name: 'デモユーザー',
+        email: loginEmail
+      });
+      setLoginEmail('');
+      setLoginPassword('');
+    } else {
+      setLoginError('メールアドレスまたはパスワードが正しくありません');
+    }
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setCurrentUser(null);
+    setActiveTab('dashboard');
+  };
 
   const showSuccessMessage = (message) => {
     setSuccessMessage(message);
@@ -332,6 +363,108 @@ export default function ThreadsAutoPostSystem() {
     }));
   };
 
+  // ログイン画面
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-500 via-cyan-500 to-blue-600 flex items-center justify-center p-4">
+        <style>{`
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+          }
+          .animate-fade-in { animation: fadeIn 0.6s ease-out; }
+          .animate-float { animation: float 3s ease-in-out infinite; }
+        `}</style>
+        
+        <div className="w-full max-w-md animate-fade-in">
+          <div className="text-center mb-8">
+            <div className="inline-block bg-white p-4 rounded-2xl shadow-2xl mb-4 animate-float">
+              <Sparkles className="text-blue-500" size={48} />
+            </div>
+            <h1 className="text-4xl font-bold text-white mb-2">Threads自動投稿</h1>
+            <p className="text-blue-100 text-lg">プロンプトで自由にAI投稿を生成</p>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-2xl p-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">ログイン</h2>
+            
+            {loginError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700">
+                <XCircle size={18} />
+                <span className="text-sm">{loginError}</span>
+              </div>
+            )}
+
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-gray-700 mb-2"><strong>デモアカウント:</strong></p>
+              <p className="text-xs text-gray-600 mb-1">📧 メール: demo@example.com</p>
+              <p className="text-xs text-gray-600">🔑 パスワード: demo1234</p>
+            </div>
+
+            <div className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  メールアドレス
+                </label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <input
+                    type="email"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                    placeholder="your@email.com"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  パスワード
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <input
+                    type="password"
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                    placeholder="••••••••"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  />
+                </div>
+              </div>
+
+              <button
+                onClick={handleLogin}
+                className="w-full py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg font-semibold hover:shadow-xl transition transform hover:scale-105 flex items-center justify-center gap-2"
+              >
+                <Lock size={20} />
+                ログイン
+              </button>
+            </div>
+
+            <div className="mt-6 text-center">
+              <p className="text-xs text-gray-500">
+                このシステムは、Threads APIを使用した自動投稿システムです
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 text-center text-white text-sm">
+            <p>© 2025 Threads Auto Post System</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // メインアプリケーション
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 p-4 md:p-8">
       <style>{`
@@ -350,13 +483,28 @@ export default function ThreadsAutoPostSystem() {
         )}
 
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-3 rounded-xl">
-              <Sparkles className="text-white" size={28} />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-3 rounded-xl">
+                <Sparkles className="text-white" size={28} />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-800">Threads自動投稿システム</h1>
+                <p className="text-gray-600 text-sm">プロンプトで自由にAI投稿を生成</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">Threads自動投稿システム</h1>
-              <p className="text-gray-600 text-sm">プロンプトで自由にAI投稿を生成</p>
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <p className="text-sm font-medium text-gray-800">{currentUser?.name}</p>
+                <p className="text-xs text-gray-500">{currentUser?.email}</p>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+              >
+                <LogOut size={18} />
+                ログアウト
+              </button>
             </div>
           </div>
         </div>
