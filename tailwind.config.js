@@ -7,12 +7,12 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        sakura1: "#fff5f8",
-        sakura2: "#ffe4eb",
-        sakura3: "#ffd4e3",
+        blue1: "#f0f7ff",
+        blue2: "#e0f0ff",
+        blue3: "#c8e6fd",
       },
       backgroundImage: {
-        "sakura-gradient": "linear-gradient(to bottom right, #fff5f8, #ffe4eb, #ffffff)",
+        "blue-gradient": "linear-gradient(to bottom right, #f0f7ff, #e0f0ff, #ffffff)",
       },
       fontFamily: {
         jp: ['"Noto Sans JP"', "sans-serif"],
@@ -21,5 +21,3 @@ module.exports = {
   },
   plugins: [],
 };
-
-
