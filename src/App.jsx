@@ -375,7 +375,7 @@ export default function ThreadsAutoPostSystem() {
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition whitespace-nowrap ${
                   activeTab === tab.id
                     ? 'bg-blue-500 text-white'
-                    : 'text-gray-600 hover:bg-gray-100'
+                    : 'bg-white text-gray-600 hover:bg-gray-100'
                 }`}
               >
                 <tab.icon size={18} />
