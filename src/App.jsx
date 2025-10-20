@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect } from "react";
 
 export default function App() {
-  const API_BASE = "https://your-backend.onrender.com"; // ← FlaskのRender URLに変更
+  const API_BASE = "https://my-ai-poster.onrender.com"; // ← FlaskのRender URLに変更
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [username, setUsername] = useState("");
