@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 
 const Calendar = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>;
 const Send = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>;
@@ -16,6 +16,10 @@ const Copy = ({ size = 24, className = "" }) => <svg width={size} height={size} 
 const Wand2 = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><path d="M12 3v7m0 0L4.22 2.22M12 10v7m0 0l7.78 7.78M3 21h18"/></svg>;
 const LogOut = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>;
 const Lock = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>;
+const Loader = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>;
+
+// API設定
+const API_URL = 'https://my-ai-poster.onrender.com';
 
 export default function ThreadsAutoPostSystem() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -23,51 +27,13 @@ export default function ThreadsAutoPostSystem() {
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
-
+  const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   
-  const [accounts, setAccounts] = useState([
-    { id: 1, username: '@tech_daily', threadsId: '1234567890', accessToken: 'EAAxxxxxxxx...', status: 'active' },
-    { id: 2, username: '@lifestyle_tips', threadsId: '0987654321', accessToken: 'EAAyyyyyyyy...', status: 'active' },
-  ]);
-
-  const [schedules, setSchedules] = useState([
-    { id: 1, accountId: 1, time: '09:00', promptId: 1, enabled: true },
-    { id: 2, accountId: 1, time: '15:00', promptId: 2, enabled: true },
-    { id: 3, accountId: 1, time: '21:00', promptId: 1, enabled: true },
-    { id: 4, accountId: 2, time: '12:00', promptId: 3, enabled: true },
-    { id: 5, accountId: 2, time: '18:00', promptId: 3, enabled: true },
-  ]);
-
-  const [prompts, setPrompts] = useState([
-    { 
-      id: 1, 
-      accountId: null, 
-      name: 'テクノロジーニュース',
-      prompt: '最新のAIやプログラミングに関する興味深いトピックについて、140文字以内でわかりやすく投稿を作成してください。技術的な内容を一般の人にも理解できるように説明し、フレンドリーなトーンで書いてください。',
-      enabled: true
-    },
-    { 
-      id: 2, 
-      accountId: null, 
-      name: '開発者向けTips',
-      prompt: 'プログラミングやコーディングに関する実用的なTipsを1つ紹介してください。具体例を含めて、初心者にもわかりやすく140文字以内で説明してください。',
-      enabled: true
-    },
-    { 
-      id: 3, 
-      accountId: null, 
-      name: 'ライフハック',
-      prompt: '日常生活を豊かにする簡単なライフハックを1つ紹介してください。実践しやすく、すぐ効果が実感できる内容を、140文字以内でポジティブなトーンで書いてください。',
-      enabled: true
-    },
-  ]);
-
-  const [posts, setPosts] = useState([
-    { id: 1, accountId: 1, content: 'AIの進化により、コーディングの効率が飛躍的に向上しています。GitHub Copilotなどのツールを活用することで、開発スピードが2倍以上に!', status: 'posted', scheduledTime: '09:00', postedAt: '2025-10-20 09:00', promptName: 'テクノロジーニュース' },
-    { id: 2, accountId: 1, content: 'コードレビューのポイント: 可読性 > 賢さ。後から見たときに理解できるコードが良いコードです。', status: 'scheduled', scheduledTime: '15:00', promptName: '開発者向けTips' },
-    { id: 3, accountId: 2, content: '朝の5分瞑想で1日のパフォーマンスが変わる。小さな習慣が大きな変化を生みます。', status: 'scheduled', scheduledTime: '12:00', promptName: 'ライフハック' },
-  ]);
+  const [accounts, setAccounts] = useState([]);
+  const [schedules, setSchedules] = useState([]);
+  const [prompts, setPrompts] = useState([]);
+  const [posts, setPosts] = useState([]);
 
   const [accountUsername, setAccountUsername] = useState('');
   const [accountThreadsId, setAccountThreadsId] = useState('');
@@ -75,7 +41,7 @@ export default function ThreadsAutoPostSystem() {
   const [promptName, setPromptName] = useState('');
   const [promptContent, setPromptContent] = useState('');
   const [scheduleTime, setScheduleTime] = useState('09:00');
-  const [scheduleAccountId, setScheduleAccountId] = useState(1);
+  const [scheduleAccountId, setScheduleAccountId] = useState('');
   const [schedulePromptId, setSchedulePromptId] = useState('');
 
   const [editingPrompt, setEditingPrompt] = useState(null);
@@ -91,12 +57,10 @@ export default function ThreadsAutoPostSystem() {
   const [editAccountThreadsId, setEditAccountThreadsId] = useState('');
   const [editAccountAccessToken, setEditAccountAccessToken] = useState('');
   
-  const [generating, setGenerating] = useState(false);
-  const [selectedPromptId, setSelectedPromptId] = useState(null);
-  const [showTemplates, setShowTemplates] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [showAddAccount, setShowAddAccount] = useState(false);
   const [showSchedules, setShowSchedules] = useState({});
+  const [showTemplates, setShowTemplates] = useState(false);
 
   const promptTemplates = [
     {
@@ -119,46 +83,78 @@ export default function ThreadsAutoPostSystem() {
       prompt: '最新のテクノロジーやデジタルツールのトレンドについて、一般の人にもわかりやすく140文字以内で解説してください。難しい技術を日常の言葉で説明し、どう役立つかを明確にしてください。',
       category: 'テック'
     },
-    {
-      name: '🎯 生産性ハック',
-      prompt: '仕事や日常で使える具体的な生産性向上のテクニックを1つ、140文字以内で紹介してください。すぐに試せる方法で、効果が実感しやすい内容にしてください。',
-      category: '生産性'
-    },
-    {
-      name: '❓ 問いかけ・対話型',
-      prompt: 'フォロワーの意見や経験を引き出す質問形式の投稿を140文字以内で作成してください。誰でも答えやすく、会話が生まれやすい質問にしてください。',
-      category: 'エンゲージメント'
-    },
-    {
-      name: '📊 データ・統計引用',
-      prompt: '興味深い統計データや調査結果を引用し、その意味や実生活への影響を140文字以内でわかりやすく解説してください。数字を使いながらも、親しみやすい表現を心がけてください。',
-      category: '情報共有'
-    },
-    {
-      name: '🌟 成功事例・ケーススタディ',
-      prompt: '小さな成功体験や興味深いケーススタディを、学びとともに140文字以内で共有してください。読者が自分ごととして捉えられるような具体的なストーリーにしてください。',
-      category: 'ストーリー'
-    },
   ];
 
-  const handleLogin = () => {
-    setLoginError('');
-
-    // デモ用の認証（実際のアプリケーションでは、サーバー側で認証を行う）
-    if (loginEmail === 'demo@example.com' && loginPassword === 'demo1234') {
-      setIsLoggedIn(true);
-      setCurrentUser({
-        name: 'デモユーザー',
-        email: loginEmail
+  // API呼び出し関数
+  const apiCall = async (endpoint, options = {}) => {
+    try {
+      const response = await fetch(`${API_URL}${endpoint}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        ...options,
       });
-      setLoginEmail('');
-      setLoginPassword('');
-    } else {
-      setLoginError('メールアドレスまたはパスワードが正しくありません');
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('API Error:', error);
+      return { success: false, error: error.message };
     }
   };
 
-  const handleLogout = () => {
+  // ログイン状態確認
+  useEffect(() => {
+    const checkLogin = async () => {
+      const data = await apiCall('/api/check_login');
+      if (data.logged_in) {
+        setIsLoggedIn(true);
+        setCurrentUser(data.user);
+        loadAllData();
+      }
+    };
+    checkLogin();
+  }, []);
+
+  // データ読み込み
+  const loadAllData = async () => {
+    const [accountsData, promptsData, schedulesData, postsData] = await Promise.all([
+      apiCall('/api/accounts/list'),
+      apiCall('/api/prompts/list'),
+      apiCall('/api/schedules/list'),
+      apiCall('/api/posts/list')
+    ]);
+
+    if (accountsData.success) setAccounts(accountsData.accounts);
+    if (promptsData.success) setPrompts(promptsData.prompts);
+    if (schedulesData.success) setSchedules(schedulesData.schedules);
+    if (postsData.success) setPosts(postsData.posts);
+  };
+
+  // ログイン
+  const handleLogin = async () => {
+    setLoginError('');
+    setLoading(true);
+    const data = await apiCall('/api/login', {
+      method: 'POST',
+      body: JSON.stringify({ email: loginEmail, password: loginPassword })
+    });
+    setLoading(false);
+
+    if (data.success) {
+      setIsLoggedIn(true);
+      setCurrentUser(data.user);
+      setLoginEmail('');
+      setLoginPassword('');
+      loadAllData();
+    } else {
+      setLoginError(data.error || 'ログインに失敗しました');
+    }
+  };
+
+  // ログアウト
+  const handleLogout = async () => {
+    await apiCall('/api/logout', { method: 'POST' });
     setIsLoggedIn(false);
     setCurrentUser(null);
     setActiveTab('dashboard');
@@ -169,183 +165,191 @@ export default function ThreadsAutoPostSystem() {
     setTimeout(() => setSuccessMessage(''), 3000);
   };
 
-  const addAccount = () => {
+  // アカウント追加
+  const addAccount = async () => {
     if (accountUsername && accountThreadsId && accountAccessToken) {
-      setAccounts([...accounts, {
-        id: accounts.length + 1,
-        username: accountUsername.startsWith('@') ? accountUsername : '@' + accountUsername,
-        threadsId: accountThreadsId,
-        accessToken: accountAccessToken,
-        status: 'active'
-      }]);
-      setAccountUsername('');
-      setAccountThreadsId('');
-      setAccountAccessToken('');
-      setShowAddAccount(false);
-      showSuccessMessage('アカウントを追加しました!');
-    } else {
-      alert('すべての項目を入力してください');
+      setLoading(true);
+      const data = await apiCall('/api/accounts/add', {
+        method: 'POST',
+        body: JSON.stringify({
+          username: accountUsername.startsWith('@') ? accountUsername : '@' + accountUsername,
+          threadsId: accountThreadsId,
+          accessToken: accountAccessToken
+        })
+      });
+      setLoading(false);
+
+      if (data.success) {
+        setAccounts([...accounts, data.account]);
+        setAccountUsername('');
+        setAccountThreadsId('');
+        setAccountAccessToken('');
+        setShowAddAccount(false);
+        showSuccessMessage('アカウントを追加しました!');
+      } else {
+        alert(data.error || '追加に失敗しました');
+      }
     }
   };
 
-  const startEditAccount = (account) => {
-    setEditingAccount(account.id);
-    setEditAccountUsername(account.username);
-    setEditAccountThreadsId(account.threadsId);
-    setEditAccountAccessToken(account.accessToken);
-  };
-
-  const saveEditedAccount = () => {
+  // アカウント更新
+  const saveEditedAccount = async () => {
     if (editingAccount) {
-      setAccounts(accounts.map(a => 
-        a.id === editingAccount ? {
-          ...a,
+      setLoading(true);
+      const data = await apiCall(`/api/accounts/update/${editingAccount}`, {
+        method: 'PUT',
+        body: JSON.stringify({
           username: editAccountUsername.startsWith('@') ? editAccountUsername : '@' + editAccountUsername,
           threadsId: editAccountThreadsId,
           accessToken: editAccountAccessToken
-        } : a
-      ));
-      setEditingAccount(null);
-      setEditAccountUsername('');
-      setEditAccountThreadsId('');
-      setEditAccountAccessToken('');
-      showSuccessMessage('アカウントを更新しました!');
+        })
+      });
+      setLoading(false);
+
+      if (data.success) {
+        await loadAllData();
+        setEditingAccount(null);
+        showSuccessMessage('アカウントを更新しました!');
+      }
     }
   };
 
-  const cancelEditAccount = () => {
-    setEditingAccount(null);
-    setEditAccountUsername('');
-    setEditAccountThreadsId('');
-    setEditAccountAccessToken('');
+  // アカウント削除
+  const deleteAccount = async (id) => {
+    if (confirm('本当に削除しますか？')) {
+      const data = await apiCall(`/api/accounts/delete/${id}`, { method: 'DELETE' });
+      if (data.success) {
+        setAccounts(accounts.filter(a => a.id !== id));
+        showSuccessMessage('アカウントを削除しました');
+      }
+    }
   };
 
-  const generateAIPost = (promptId) => {
-    const prompt = prompts.find(p => p.id === promptId);
-    if (!prompt) return;
-
-    setGenerating(true);
-    setSelectedPromptId(promptId);
-    
-    setTimeout(() => {
-      const sampleResponses = [
-        'AIと人間の協働が新しい時代を創る。技術は道具であり、それを使いこなす私たちの創造性こそが未来を形作ります。',
-        'プログラミング学習のコツ: 完璧を目指さず、まず動くものを作る。そこから改善していくプロセスが最も学びになります。',
-        'デバッグの極意: エラーメッセージを恐れずに読む。そこに答えが必ず隠されています。',
-        '朝の30分で1日が変わる。スマホを見る前に、今日の目標を3つ書き出してみよう。',
-        '生産性を上げる秘訣: マルチタスクをやめ、1つのことに集中する時間を作ることです。',
-        'コードは詩のように美しくあるべき。シンプルで読みやすいコードが、後のあなたを助けます。',
-      ];
-
-      const newPost = {
-        id: posts.length + 1,
-        accountId: prompt.accountId || accounts[0].id,
-        content: sampleResponses[Math.floor(Math.random() * sampleResponses.length)],
-        status: 'draft',
-        scheduledTime: '',
-        promptName: prompt.name,
-      };
-
-      setPosts([newPost, ...posts]);
-      setGenerating(false);
-      setSelectedPromptId(null);
-      showSuccessMessage('投稿を生成しました!');
-    }, 2000);
-  };
-
-  const addPrompt = () => {
+  // プロンプト追加
+  const addPrompt = async () => {
     if (promptName && promptContent) {
-      setPrompts([...prompts, {
-        id: prompts.length + 1,
-        accountId: null,
-        name: promptName,
-        prompt: promptContent,
-        enabled: true
-      }]);
-      setPromptName('');
-      setPromptContent('');
-      showSuccessMessage('プロンプトを追加しました!');
-    } else {
-      alert('プロンプト名とプロンプト内容を入力してください');
+      setLoading(true);
+      const data = await apiCall('/api/prompts/add', {
+        method: 'POST',
+        body: JSON.stringify({ name: promptName, prompt: promptContent })
+      });
+      setLoading(false);
+
+      if (data.success) {
+        setPrompts([...prompts, data.prompt]);
+        setPromptName('');
+        setPromptContent('');
+        showSuccessMessage('プロンプトを追加しました!');
+      }
     }
   };
 
-  const startEditPrompt = (prompt) => {
-    setEditingPrompt(prompt.id);
-    setEditName(prompt.name);
-    setEditContent(prompt.prompt);
-  };
-
-  const saveEditedPrompt = () => {
+  // プロンプト更新
+  const saveEditedPrompt = async () => {
     if (editingPrompt) {
-      setPrompts(prompts.map(p => 
-        p.id === editingPrompt ? { ...p, name: editName, prompt: editContent } : p
-      ));
-      setEditingPrompt(null);
-      setEditName('');
-      setEditContent('');
-      showSuccessMessage('プロンプトを更新しました!');
+      const data = await apiCall(`/api/prompts/update/${editingPrompt}`, {
+        method: 'PUT',
+        body: JSON.stringify({ name: editName, prompt: editContent })
+      });
+
+      if (data.success) {
+        setPrompts(prompts.map(p => 
+          p.id === editingPrompt ? { ...p, name: editName, prompt: editContent } : p
+        ));
+        setEditingPrompt(null);
+        showSuccessMessage('プロンプトを更新しました!');
+      }
     }
   };
 
-  const deletePrompt = (id) => {
-    setPrompts(prompts.filter(p => p.id !== id));
-    showSuccessMessage('プロンプトを削除しました');
+  // プロンプト削除
+  const deletePrompt = async (id) => {
+    if (confirm('本当に削除しますか？')) {
+      const data = await apiCall(`/api/prompts/delete/${id}`, { method: 'DELETE' });
+      if (data.success) {
+        setPrompts(prompts.filter(p => p.id !== id));
+        showSuccessMessage('プロンプトを削除しました');
+      }
+    }
   };
 
-  const useTemplate = (template) => {
-    setPromptContent(template.prompt);
-  };
-
-  const addSchedule = () => {
+  // スケジュール追加
+  const addSchedule = async (accountId) => {
     if (!schedulePromptId) {
       alert('プロンプトを選択してください');
       return;
     }
-    
-    setSchedules([...schedules, {
-      id: schedules.length + 1,
-      accountId: parseInt(scheduleAccountId),
-      time: scheduleTime,
-      promptId: parseInt(schedulePromptId),
-      enabled: true
-    }]);
-    setSchedulePromptId('');
-    showSuccessMessage('スケジュールを追加しました!');
-  };
 
-  const startEditSchedule = (schedule) => {
-    setEditingSchedule(schedule.id);
-    setEditScheduleTime(schedule.time);
-    setEditSchedulePromptId(schedule.promptId);
-  };
+    setLoading(true);
+    const data = await apiCall('/api/schedules/add', {
+      method: 'POST',
+      body: JSON.stringify({
+        accountId: parseInt(accountId),
+        time: scheduleTime,
+        promptId: parseInt(schedulePromptId)
+      })
+    });
+    setLoading(false);
 
-  const saveEditedSchedule = () => {
-    if (editingSchedule) {
-      setSchedules(schedules.map(s => 
-        s.id === editingSchedule ? { ...s, time: editScheduleTime, promptId: parseInt(editSchedulePromptId) } : s
-      ));
-      setEditingSchedule(null);
-      setEditScheduleTime('');
-      setEditSchedulePromptId('');
-      showSuccessMessage('スケジュールを更新しました!');
+    if (data.success) {
+      setSchedules([...schedules, data.schedule]);
+      setSchedulePromptId('');
+      showSuccessMessage('スケジュールを追加しました!');
     }
   };
 
-  const toggleSchedule = (id) => {
-    setSchedules(schedules.map(s => 
-      s.id === id ? { ...s, enabled: !s.enabled } : s
-    ));
+  // スケジュール更新
+  const saveEditedSchedule = async () => {
+    if (editingSchedule) {
+      const data = await apiCall(`/api/schedules/update/${editingSchedule}`, {
+        method: 'PUT',
+        body: JSON.stringify({ time: editScheduleTime, promptId: parseInt(editSchedulePromptId) })
+      });
+
+      if (data.success) {
+        await loadAllData();
+        setEditingSchedule(null);
+        showSuccessMessage('スケジュールを更新しました!');
+      }
+    }
   };
 
-  const deleteSchedule = (id) => {
-    setSchedules(schedules.filter(s => s.id !== id));
-    showSuccessMessage('スケジュールを削除しました');
+  // スケジュール切替
+  const toggleSchedule = async (id) => {
+    const data = await apiCall(`/api/schedules/toggle/${id}`, { method: 'PUT' });
+    if (data.success) {
+      setSchedules(schedules.map(s => 
+        s.id === id ? { ...s, enabled: data.enabled } : s
+      ));
+    }
   };
 
-  const deletePost = (id) => {
-    setPosts(posts.filter(p => p.id !== id));
-    showSuccessMessage('投稿を削除しました');
+  // スケジュール削除
+  const deleteSchedule = async (id) => {
+    if (confirm('本当に削除しますか？')) {
+      const data = await apiCall(`/api/schedules/delete/${id}`, { method: 'DELETE' });
+      if (data.success) {
+        setSchedules(schedules.filter(s => s.id !== id));
+        showSuccessMessage('スケジュールを削除しました');
+      }
+    }
+  };
+
+  // AI投稿生成
+  const generatePost = async (promptId, accountId) => {
+    setLoading(true);
+    const data = await apiCall('/api/generate_post', {
+      method: 'POST',
+      body: JSON.stringify({ promptId, accountId })
+    });
+    setLoading(false);
+
+    if (data.success) {
+      await loadAllData();
+      showSuccessMessage('投稿を生成しました!');
+    } else {
+      alert(data.error || '生成に失敗しました');
+    }
   };
 
   const getAccountUsername = (accountId) => {
@@ -363,6 +367,11 @@ export default function ThreadsAutoPostSystem() {
     }));
   };
 
+  const useTemplate = (template) => {
+    setPromptContent(template.prompt);
+    showSuccessMessage('テンプレートを適用しました!');
+  };
+
   // ログイン画面
   if (!isLoggedIn) {
     return (
@@ -376,8 +385,12 @@ export default function ThreadsAutoPostSystem() {
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-20px); }
           }
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
           .animate-fade-in { animation: fadeIn 0.6s ease-out; }
           .animate-float { animation: float 3s ease-in-out infinite; }
+          .animate-spin { animation: spin 1s linear infinite; }
         `}</style>
         
         <div className="w-full max-w-md animate-fade-in">
@@ -442,17 +455,21 @@ export default function ThreadsAutoPostSystem() {
 
               <button
                 onClick={handleLogin}
-                className="w-full py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg font-semibold hover:shadow-xl transition transform hover:scale-105 flex items-center justify-center gap-2"
+                disabled={loading}
+                className="w-full py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg font-semibold hover:shadow-xl transition transform hover:scale-105 flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                <Lock size={20} />
-                ログイン
+                {loading ? (
+                  <>
+                    <Loader className="animate-spin" size={20} />
+                    ログイン中...
+                  </>
+                ) : (
+                  <>
+                    <Lock size={20} />
+                    ログイン
+                  </>
+                )}
               </button>
-            </div>
-
-            <div className="mt-6 text-center">
-              <p className="text-xs text-gray-500">
-                このシステムは、Threads APIを使用した自動投稿システムです
-              </p>
             </div>
           </div>
 
@@ -472,7 +489,11 @@ export default function ThreadsAutoPostSystem() {
           from { opacity: 0; transform: translateY(-10px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
         .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
+        .animate-spin { animation: spin 1s linear infinite; }
       `}</style>
       <div className="max-w-6xl mx-auto">
         {successMessage && (
@@ -535,13 +556,13 @@ export default function ThreadsAutoPostSystem() {
 
         {activeTab === 'dashboard' && (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm opacity-90">予約済み</span>
-                  <Clock size={24} />
+                  <span className="text-sm opacity-90">アカウント数</span>
+                  <User size={24} />
                 </div>
-                <div className="text-3xl font-bold">{posts.filter(p => p.status === 'scheduled').length}</div>
+                <div className="text-3xl font-bold">{accounts.length}</div>
               </div>
               <div className="bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl p-6 text-white">
                 <div className="flex items-center justify-between mb-2">
@@ -549,6 +570,13 @@ export default function ThreadsAutoPostSystem() {
                   <Sparkles size={24} />
                 </div>
                 <div className="text-3xl font-bold">{schedules.filter(s => s.enabled).length}</div>
+              </div>
+              <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm opacity-90">投稿履歴</span>
+                  <Clock size={24} />
+                </div>
+                <div className="text-3xl font-bold">{posts.length}</div>
               </div>
             </div>
           </div>
@@ -601,14 +629,14 @@ export default function ThreadsAutoPostSystem() {
                         rows={3}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                       />
-                      <p className="text-xs text-gray-500 mt-1">Meta Developer Platformから取得したアクセストークンを入力してください</p>
                     </div>
                     <div className="flex gap-3">
                       <button
                         onClick={addAccount}
-                        className="flex-1 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-medium"
+                        disabled={loading}
+                        className="flex-1 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-medium disabled:opacity-50"
                       >
-                        追加
+                        {loading ? '追加中...' : '追加'}
                       </button>
                       <button
                         onClick={() => setShowAddAccount(false)}
@@ -622,241 +650,263 @@ export default function ThreadsAutoPostSystem() {
               )}
 
               <div className="space-y-6">
-                {accounts.map(account => {
-                  const accountSchedules = schedules.filter(s => s.accountId === account.id);
-                  
-                  return (
-                    <div key={account.id} className="p-6 border-2 border-blue-200 rounded-xl hover:border-blue-400 transition">
-                      {editingAccount === account.id ? (
-                        <div className="space-y-4">
-                          <h4 className="font-semibold text-gray-800 mb-4">アカウント編集</h4>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">ユーザー名</label>
-                            <input
-                              type="text"
-                              value={editAccountUsername}
-                              onChange={(e) => setEditAccountUsername(e.target.value)}
-                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Threads ID</label>
-                            <input
-                              type="text"
-                              value={editAccountThreadsId}
-                              onChange={(e) => setEditAccountThreadsId(e.target.value)}
-                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">アクセストークン</label>
-                            <textarea
-                              value={editAccountAccessToken}
-                              onChange={(e) => setEditAccountAccessToken(e.target.value)}
-                              rows={3}
-                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                            />
-                          </div>
-                          <div className="flex gap-3">
-                            <button
-                              onClick={saveEditedAccount}
-                              className="flex-1 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-medium flex items-center justify-center gap-2"
-                            >
-                              <Save size={18} />
-                              保存
-                            </button>
-                            <button
-                              onClick={cancelEditAccount}
-                              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
-                            >
-                              キャンセル
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <>
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="flex items-center gap-4">
-                              <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                                {account.username.slice(1, 3).toUpperCase()}
-                              </div>
-                              <div>
-                                <h4 className="font-bold text-gray-800 text-lg">{account.username}</h4>
-                                <div className="mt-2 space-y-1">
-                                  <p className="text-xs text-gray-500">
-                                    <span className="font-medium">Threads ID:</span> {account.threadsId}
-                                  </p>
-                                  <p className="text-xs text-gray-500">
-                                    <span className="font-medium">トークン:</span> {account.accessToken.slice(0, 10)}...••••••••
-                                  </p>
-                                </div>
-                              </div>
+                {accounts.length === 0 ? (
+                  <div className="text-center py-12">
+                    <User className="mx-auto text-gray-300 mb-4" size={48} />
+                    <p className="text-gray-500">アカウントがまだ登録されていません</p>
+                    <p className="text-xs text-gray-400 mt-2">上のボタンから追加してください</p>
+                  </div>
+                ) : (
+                  accounts.map(account => {
+                    const accountSchedules = schedules.filter(s => s.accountId === account.id);
+                    
+                    return (
+                      <div key={account.id} className="p-6 border-2 border-blue-200 rounded-xl hover:border-blue-400 transition">
+                        {editingAccount === account.id ? (
+                          <div className="space-y-4">
+                            <h4 className="font-semibold text-gray-800 mb-4">アカウント編集</h4>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">ユーザー名</label>
+                              <input
+                                type="text"
+                                value={editAccountUsername}
+                                onChange={(e) => setEditAccountUsername(e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              />
                             </div>
-                            <div className="flex items-center gap-2">
-                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                account.status === 'active' ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-700'
-                              }`}>
-                                {account.status === 'active' ? 'アクティブ' : '無効'}
-                              </span>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">Threads ID</label>
+                              <input
+                                type="text"
+                                value={editAccountThreadsId}
+                                onChange={(e) => setEditAccountThreadsId(e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">アクセストークン</label>
+                              <textarea
+                                value={editAccountAccessToken}
+                                onChange={(e) => setEditAccountAccessToken(e.target.value)}
+                                rows={3}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                              />
+                            </div>
+                            <div className="flex gap-3">
                               <button
-                                onClick={() => startEditAccount(account)}
-                                className="p-2 hover:bg-blue-50 rounded-lg transition"
+                                onClick={saveEditedAccount}
+                                disabled={loading}
+                                className="flex-1 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-medium flex items-center justify-center gap-2"
                               >
-                                <Edit className="text-blue-500" size={18} />
+                                <Save size={18} />
+                                保存
+                              </button>
+                              <button
+                                onClick={() => setEditingAccount(null)}
+                                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                              >
+                                キャンセル
                               </button>
                             </div>
                           </div>
-
-                          <div className="mt-4 pt-4 border-t border-gray-200">
-                            <button
-                              onClick={() => toggleScheduleVisibility(account.id)}
-                              className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition"
-                            >
-                              <h5 className="font-semibold text-gray-800 flex items-center gap-2">
-                                <Clock size={18} className="text-blue-500" />
-                                投稿スケジュール
-                                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-                                  {accountSchedules.length}件
-                                </span>
-                              </h5>
-                              <span className="text-sm text-blue-600">
-                                {showSchedules[account.id] ? '▼' : '▶'}
-                              </span>
-                            </button>
-
-                            {showSchedules[account.id] && (
-                              <div className="mt-3">
-                                <div className="mb-3 p-4 bg-blue-50 rounded-lg">
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                                    <div>
-                                      <label className="block text-xs font-medium text-gray-700 mb-1">投稿時刻</label>
-                                      <input
-                                        type="time"
-                                        value={scheduleTime}
-                                        onChange={(e) => setScheduleTime(e.target.value)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                      />
-                                    </div>
-                                    <div>
-                                      <label className="block text-xs font-medium text-gray-700 mb-1">使用プロンプト</label>
-                                      <select
-                                        value={schedulePromptId}
-                                        onChange={(e) => setSchedulePromptId(e.target.value)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                      >
-                                        <option value="">プロンプトを選択</option>
-                                        {prompts.map(prompt => (
-                                          <option key={prompt.id} value={prompt.id}>{prompt.name}</option>
-                                        ))}
-                                      </select>
-                                    </div>
-                                  </div>
-                                  <button
-                                    onClick={() => {
-                                      setScheduleAccountId(account.id);
-                                      addSchedule();
-                                    }}
-                                    className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium flex items-center justify-center gap-2"
-                                  >
-                                    <Plus size={16} />
-                                    スケジュールを追加
-                                  </button>
+                        ) : (
+                          <>
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="flex items-center gap-4">
+                                <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                                  {account.username.slice(1, 3).toUpperCase()}
                                 </div>
-
-                                <div className="space-y-2">
-                                  {accountSchedules.length > 0 ? (
-                                    accountSchedules.map(schedule => (
-                                      <div key={schedule.id} className="p-3 bg-white border border-gray-200 rounded-lg">
-                                        {editingSchedule === schedule.id ? (
-                                          <div className="space-y-3">
-                                            <div className="grid grid-cols-2 gap-2">
-                                              <div>
-                                                <label className="block text-xs font-medium text-gray-700 mb-1">時刻</label>
-                                                <input
-                                                  type="time"
-                                                  value={editScheduleTime}
-                                                  onChange={(e) => setEditScheduleTime(e.target.value)}
-                                                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                                                />
-                                              </div>
-                                              <div>
-                                                <label className="block text-xs font-medium text-gray-700 mb-1">プロンプト</label>
-                                                <select
-                                                  value={editSchedulePromptId}
-                                                  onChange={(e) => setEditSchedulePromptId(e.target.value)}
-                                                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                                                >
-                                                  {prompts.map(prompt => (
-                                                    <option key={prompt.id} value={prompt.id}>{prompt.name}</option>
-                                                  ))}
-                                                </select>
-                                              </div>
-                                            </div>
-                                            <div className="flex gap-2">
-                                              <button
-                                                onClick={saveEditedSchedule}
-                                                className="flex-1 px-3 py-1 bg-blue-500 text-white rounded text-xs flex items-center justify-center gap-1"
-                                              >
-                                                <Save size={14} />
-                                                保存
-                                              </button>
-                                              <button
-                                                onClick={() => setEditingSchedule(null)}
-                                                className="px-3 py-1 bg-gray-300 text-gray-700 rounded text-xs"
-                                              >
-                                                キャンセル
-                                              </button>
-                                            </div>
-                                          </div>
-                                        ) : (
-                                          <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-3 flex-1">
-                                              <Clock className="text-blue-500" size={18} />
-                                              <div>
-                                                <div className="font-semibold text-gray-800">{schedule.time}</div>
-                                                <div className="text-xs text-gray-500">{getPromptName(schedule.promptId)}</div>
-                                              </div>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                              <button
-                                                onClick={() => toggleSchedule(schedule.id)}
-                                                className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                                                  schedule.enabled 
-                                                    ? 'bg-cyan-100 text-cyan-700 hover:bg-cyan-200' 
-                                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                                }`}
-                                              >
-                                                {schedule.enabled ? '有効' : '無効'}
-                                              </button>
-                                              <button
-                                                onClick={() => startEditSchedule(schedule)}
-                                                className="p-1 hover:bg-blue-50 rounded transition"
-                                              >
-                                                <Edit className="text-blue-500" size={16} />
-                                              </button>
-                                              <button
-                                                onClick={() => deleteSchedule(schedule.id)}
-                                                className="p-1 hover:bg-red-50 rounded transition"
-                                              >
-                                                <Trash2 className="text-red-500" size={16} />
-                                              </button>
-                                            </div>
-                                          </div>
-                                        )}
-                                      </div>
-                                    ))
-                                  ) : (
-                                    <p className="text-sm text-gray-500 text-center py-2">スケジュールが設定されていません</p>
-                                  )}
+                                <div>
+                                  <h4 className="font-bold text-gray-800 text-lg">{account.username}</h4>
+                                  <div className="mt-2 space-y-1">
+                                    <p className="text-xs text-gray-500">
+                                      <span className="font-medium">Threads ID:</span> {account.threadsId}
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                      <span className="font-medium">トークン:</span> {account.accessToken.slice(0, 10)}...••••••••
+                                    </p>
+                                  </div>
                                 </div>
                               </div>
-                            )}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  );
-                })}
+                              <div className="flex items-center gap-2">
+                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                  account.status === 'active' ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-700'
+                                }`}>
+                                  {account.status === 'active' ? 'アクティブ' : '無効'}
+                                </span>
+                                <button
+                                  onClick={() => {
+                                    setEditingAccount(account.id);
+                                    setEditAccountUsername(account.username);
+                                    setEditAccountThreadsId(account.threadsId);
+                                    setEditAccountAccessToken(account.accessToken);
+                                  }}
+                                  className="p-2 hover:bg-blue-50 rounded-lg transition"
+                                >
+                                  <Edit className="text-blue-500" size={18} />
+                                </button>
+                                <button
+                                  onClick={() => deleteAccount(account.id)}
+                                  className="p-2 hover:bg-red-50 rounded-lg transition"
+                                >
+                                  <Trash2 className="text-red-500" size={18} />
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="mt-4 pt-4 border-t border-gray-200">
+                              <button
+                                onClick={() => toggleScheduleVisibility(account.id)}
+                                className="w-full flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition"
+                              >
+                                <h5 className="font-semibold text-gray-800 flex items-center gap-2">
+                                  <Clock size={18} className="text-blue-500" />
+                                  投稿スケジュール
+                                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                                    {accountSchedules.length}件
+                                  </span>
+                                </h5>
+                                <span className="text-sm text-blue-600">
+                                  {showSchedules[account.id] ? '▼' : '▶'}
+                                </span>
+                              </button>
+
+                              {showSchedules[account.id] && (
+                                <div className="mt-3">
+                                  <div className="mb-3 p-4 bg-blue-50 rounded-lg">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                                      <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">投稿時刻</label>
+                                        <input
+                                          type="time"
+                                          value={scheduleTime}
+                                          onChange={(e) => setScheduleTime(e.target.value)}
+                                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                      </div>
+                                      <div>
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">使用プロンプト</label>
+                                        <select
+                                          value={schedulePromptId}
+                                          onChange={(e) => setSchedulePromptId(e.target.value)}
+                                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        >
+                                          <option value="">プロンプトを選択</option>
+                                          {prompts.map(prompt => (
+                                            <option key={prompt.id} value={prompt.id}>{prompt.name}</option>
+                                          ))}
+                                        </select>
+                                      </div>
+                                    </div>
+                                    <button
+                                      onClick={() => addSchedule(account.id)}
+                                      disabled={loading}
+                                      className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-50"
+                                    >
+                                      <Plus size={16} />
+                                      {loading ? '追加中...' : 'スケジュールを追加'}
+                                    </button>
+                                  </div>
+
+                                  <div className="space-y-2">
+                                    {accountSchedules.length > 0 ? (
+                                      accountSchedules.map(schedule => (
+                                        <div key={schedule.id} className="p-3 bg-white border border-gray-200 rounded-lg">
+                                          {editingSchedule === schedule.id ? (
+                                            <div className="space-y-3">
+                                              <div className="grid grid-cols-2 gap-2">
+                                                <div>
+                                                  <label className="block text-xs font-medium text-gray-700 mb-1">時刻</label>
+                                                  <input
+                                                    type="time"
+                                                    value={editScheduleTime}
+                                                    onChange={(e) => setEditScheduleTime(e.target.value)}
+                                                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                                  />
+                                                </div>
+                                                <div>
+                                                  <label className="block text-xs font-medium text-gray-700 mb-1">プロンプト</label>
+                                                  <select
+                                                    value={editSchedulePromptId}
+                                                    onChange={(e) => setEditSchedulePromptId(e.target.value)}
+                                                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                                  >
+                                                    {prompts.map(prompt => (
+                                                      <option key={prompt.id} value={prompt.id}>{prompt.name}</option>
+                                                    ))}
+                                                  </select>
+                                                </div>
+                                              </div>
+                                              <div className="flex gap-2">
+                                                <button
+                                                  onClick={saveEditedSchedule}
+                                                  className="flex-1 px-3 py-1 bg-blue-500 text-white rounded text-xs flex items-center justify-center gap-1"
+                                                >
+                                                  <Save size={14} />
+                                                  保存
+                                                </button>
+                                                <button
+                                                  onClick={() => setEditingSchedule(null)}
+                                                  className="px-3 py-1 bg-gray-300 text-gray-700 rounded text-xs"
+                                                >
+                                                  キャンセル
+                                                </button>
+                                              </div>
+                                            </div>
+                                          ) : (
+                                            <div className="flex items-center justify-between">
+                                              <div className="flex items-center gap-3 flex-1">
+                                                <Clock className="text-blue-500" size={18} />
+                                                <div>
+                                                  <div className="font-semibold text-gray-800">{schedule.time}</div>
+                                                  <div className="text-xs text-gray-500">{getPromptName(schedule.promptId)}</div>
+                                                </div>
+                                              </div>
+                                              <div className="flex items-center gap-2">
+                                                <button
+                                                  onClick={() => toggleSchedule(schedule.id)}
+                                                  className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                                                    schedule.enabled 
+                                                      ? 'bg-cyan-100 text-cyan-700 hover:bg-cyan-200' 
+                                                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                  }`}
+                                                >
+                                                  {schedule.enabled ? '有効' : '無効'}
+                                                </button>
+                                                <button
+                                                  onClick={() => {
+                                                    setEditingSchedule(schedule.id);
+                                                    setEditScheduleTime(schedule.time);
+                                                    setEditSchedulePromptId(schedule.promptId);
+                                                  }}
+                                                  className="p-1 hover:bg-blue-50 rounded transition"
+                                                >
+                                                  <Edit className="text-blue-500" size={16} />
+                                                </button>
+                                                <button
+                                                  onClick={() => deleteSchedule(schedule.id)}
+                                                  className="p-1 hover:bg-red-50 rounded transition"
+                                                >
+                                                  <Trash2 className="text-red-500" size={16} />
+                                                </button>
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
+                                      ))
+                                    ) : (
+                                      <p className="text-sm text-gray-500 text-center py-2">スケジュールが設定されていません</p>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
           </div>
@@ -928,16 +978,13 @@ export default function ThreadsAutoPostSystem() {
                     rows={5}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    💡 ヒント: 文字数制限、トーン、含めて欲しい要素を明確に指定するといい結果が得られます
-                  </p>
                 </div>
                 <button
                   onClick={addPrompt}
-                  disabled={!promptName || !promptContent}
+                  disabled={!promptName || !promptContent || loading}
                   className="w-full py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:shadow-lg transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  プロンプトを追加
+                  {loading ? '追加中...' : 'プロンプトを追加'}
                 </button>
               </div>
             </div>
@@ -945,70 +992,98 @@ export default function ThreadsAutoPostSystem() {
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <h3 className="text-xl font-bold text-gray-800 mb-4">登録済みプロンプト</h3>
               <div className="space-y-4">
-                {prompts.map(prompt => (
-                  <div key={prompt.id} className={`p-4 border-2 rounded-xl transition ${
-                    prompt.enabled ? 'border-blue-200 bg-blue-50' : 'border-gray-200 bg-gray-50'
-                  }`}>
-                    {editingPrompt === prompt.id ? (
-                      <div className="space-y-3">
-                        <input
-                          type="text"
-                          value={editName}
-                          onChange={(e) => setEditName(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                        />
-                        <textarea
-                          value={editContent}
-                          onChange={(e) => setEditContent(e.target.value)}
-                          rows={4}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none"
-                        />
-                        <div className="flex gap-2">
-                          <button
-                            onClick={saveEditedPrompt}
-                            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm flex items-center gap-2"
-                          >
-                            <Save size={16} />
-                            保存
-                          </button>
-                          <button
-                            onClick={() => setEditingPrompt(null)}
-                            className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition text-sm"
-                          >
-                            キャンセル
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <h4 className="font-bold text-gray-800">{prompt.name}</h4>
-                            </div>
-                            <p className="text-sm text-gray-700 leading-relaxed">{prompt.prompt}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-end pt-3 border-t border-gray-200">
+                {prompts.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Sparkles className="mx-auto text-gray-300 mb-4" size={48} />
+                    <p className="text-gray-500">プロンプトがまだ登録されていません</p>
+                    <p className="text-xs text-gray-400 mt-2">上のフォームから追加してください</p>
+                  </div>
+                ) : (
+                  prompts.map(prompt => (
+                    <div key={prompt.id} className="p-4 border-2 rounded-xl transition border-blue-200 bg-blue-50">
+                      {editingPrompt === prompt.id ? (
+                        <div className="space-y-3">
+                          <input
+                            type="text"
+                            value={editName}
+                            onChange={(e) => setEditName(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                          />
+                          <textarea
+                            value={editContent}
+                            onChange={(e) => setEditContent(e.target.value)}
+                            rows={4}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none"
+                          />
                           <div className="flex gap-2">
                             <button
-                              onClick={() => startEditPrompt(prompt)}
-                              className="p-2 hover:bg-blue-50 rounded-lg transition"
+                              onClick={saveEditedPrompt}
+                              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition text-sm flex items-center gap-2"
                             >
-                              <Edit className="text-blue-500" size={18} />
+                              <Save size={16} />
+                              保存
                             </button>
                             <button
-                              onClick={() => deletePrompt(prompt.id)}
-                              className="p-2 hover:bg-red-50 rounded-lg transition"
+                              onClick={() => setEditingPrompt(null)}
+                              className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition text-sm"
                             >
-                              <Trash2 className="text-red-500" size={18} />
+                              キャンセル
                             </button>
                           </div>
                         </div>
-                      </>
-                    )}
-                  </div>
-                ))}
+                      ) : (
+                        <>
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h4 className="font-bold text-gray-800">{prompt.name}</h4>
+                              </div>
+                              <p className="text-sm text-gray-700 leading-relaxed">{prompt.prompt}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+                            <div className="flex gap-2">
+                              {accounts.length > 0 && (
+                                <select
+                                  onChange={(e) => {
+                                    if (e.target.value) {
+                                      generatePost(prompt.id, parseInt(e.target.value));
+                                      e.target.value = '';
+                                    }
+                                  }}
+                                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                                >
+                                  <option value="">AI生成して投稿...</option>
+                                  {accounts.map(acc => (
+                                    <option key={acc.id} value={acc.id}>{acc.username}</option>
+                                  ))}
+                                </select>
+                              )}
+                            </div>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => {
+                                  setEditingPrompt(prompt.id);
+                                  setEditName(prompt.name);
+                                  setEditContent(prompt.prompt);
+                                }}
+                                className="p-2 hover:bg-blue-50 rounded-lg transition"
+                              >
+                                <Edit className="text-blue-500" size={18} />
+                              </button>
+                              <button
+                                onClick={() => deletePrompt(prompt.id)}
+                                className="p-2 hover:bg-red-50 rounded-lg transition"
+                              >
+                                <Trash2 className="text-red-500" size={18} />
+                              </button>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -1048,6 +1123,15 @@ export default function ThreadsAutoPostSystem() {
           </div>
         )}
 
+        {loading && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 flex items-center gap-3">
+              <Loader className="animate-spin text-blue-500" size={24} />
+              <span className="text-gray-700">処理中...</span>
+            </div>
+          </div>
+        )}
+
         <div className="mt-6 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-xl p-4">
           <p className="text-sm text-gray-700 mb-2">
             <strong>💡 プロンプトのコツ:</strong> 具体的な指示(文字数、トーン、含める要素)を書くと、いい投稿が生成されます。
@@ -1056,9 +1140,7 @@ export default function ThreadsAutoPostSystem() {
             <strong>⏰ スケジュール機能:</strong> 各スケジュールに投稿時刻とプロンプトを設定できます。設定した時刻に自動的にAIが投稿を生成して投稿します。
           </p>
           <p className="text-sm text-gray-700">
-            <strong>📌 Threads API設定:</strong> アカウント追加時には、Meta Developer Platformから取得した<strong>Threads ID</strong>と<strong>アクセストークン</strong>が必要です。
-            詳細は <a href="https://developers.facebook.com/docs/threads" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Threads APIドキュメント</a> をご覧ください。
-            実際の運用には、バックエンド(Node.js + OpenAI API + Threads API)の実装が必要です。
+            <strong>🔗 接続先:</strong> {API_URL}
           </p>
         </div>
       </div>
