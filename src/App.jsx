@@ -1,11 +1,11 @@
 ﻿import { useState, useEffect } from "react";
 
 export default function App() {
-  // ✅ FlaskのRender URL
+  // ✅ Flask の Render API ベースURL
   const API_BASE = "https://my-ai-poster.onrender.com";
 
   // -------------------------------
-  // 🔹 状態管理
+  // 状態管理
   // -------------------------------
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
@@ -17,7 +17,7 @@ export default function App() {
   const [subscription, setSubscription] = useState("free"); // 🆕 サブスク状態
 
   // -------------------------------
-  // 🔹 初回ログインチェック
+  // 初回ログインチェック
   // -------------------------------
   useEffect(() => {
     (async () => {
@@ -40,7 +40,7 @@ export default function App() {
   }, []);
 
   // -------------------------------
-  // 🔹 履歴取得
+  // 履歴取得
   // -------------------------------
   const fetchHistory = async () => {
     try {
@@ -55,7 +55,7 @@ export default function App() {
   };
 
   // -------------------------------
-  // 🔹 サブスク状態取得 🆕
+  // サブスク状態取得 🆕
   // -------------------------------
   const fetchSubscription = async () => {
     try {
@@ -72,7 +72,7 @@ export default function App() {
   };
 
   // -------------------------------
-  // 🔹 登録 or ログイン
+  // 登録 or ログイン
   // -------------------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -95,7 +95,7 @@ export default function App() {
   };
 
   // -------------------------------
-  // 🔹 ログアウト
+  // ログアウト
   // -------------------------------
   const handleLogout = async () => {
     await fetch(`${API_BASE}/api/logout`, {
@@ -108,7 +108,7 @@ export default function App() {
   };
 
   // -------------------------------
-  // 🔹 履歴保存テスト
+  // 保存テスト
   // -------------------------------
   const handleSaveTest = async () => {
     const res = await fetch(`${API_BASE}/api/history`, {
@@ -130,7 +130,30 @@ export default function App() {
   };
 
   // -------------------------------
-  // 🔹 表示レンダリング
+  // 🆕 Stripe 決済開始
+  // -------------------------------
+  const handleCheckout = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/create_checkout_session`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url; // Stripe Checkout へ遷移
+      } else {
+        setMessage("❌ チェックアウトURLの取得に失敗しました");
+      }
+    } catch (err) {
+      console.error("Stripe checkout error:", err);
+      setMessage("❌ Stripeエラーが発生しました");
+    }
+  };
+
+  // -------------------------------
+  // 表示レンダリング
   // -------------------------------
   if (!authChecked) return <p>読み込み中...</p>;
 
@@ -187,7 +210,7 @@ export default function App() {
         ようこそ {user} さん
       </h1>
 
-      {/* 🆕 サブスクステータス表示 */}
+      {/* 🪙 サブスクステータス */}
       {subscription === "active" ? (
         <div className="p-3 bg-green-100 text-green-700 rounded-xl mb-4">
           🌟 プレミアム会員（有効）
@@ -205,6 +228,14 @@ export default function App() {
         >
           💾 保存テスト
         </button>
+        {subscription === "free" && (
+          <button
+            onClick={handleCheckout}
+            className="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded-lg"
+          >
+            💳 プレミアム登録
+          </button>
+        )}
         <button
           onClick={handleLogout}
           className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded-lg"
