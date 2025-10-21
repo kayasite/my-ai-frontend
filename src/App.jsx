@@ -1,16 +1,23 @@
 ﻿import { useState, useEffect } from "react";
 
 export default function App() {
-  const API_BASE = "https://my-ai-poster.onrender.com"; // ← FlaskのRender URL
+  // ✅ FlaskのRender URLを指定
+  const API_BASE = "https://my-ai-poster.onrender.com";
+
+  // -------------------------------
+  // 🔹 React 状態管理
+  // -------------------------------
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState(""); // ← 修正: email に統一
   const [password, setPassword] = useState("");
   const [isRegister, setIsRegister] = useState(false);
   const [message, setMessage] = useState("");
   const [history, setHistory] = useState([]);
 
+  // -------------------------------
   // 🔹 ログイン状態チェック
+  // -------------------------------
   useEffect(() => {
     (async () => {
       try {
@@ -30,7 +37,9 @@ export default function App() {
     })();
   }, []);
 
+  // -------------------------------
   // 🔹 履歴取得
+  // -------------------------------
   const fetchHistory = async () => {
     try {
       const res = await fetch(`${API_BASE}/api/history`, {
@@ -43,7 +52,9 @@ export default function App() {
     }
   };
 
-  // 🔹 登録・ログイン
+  // -------------------------------
+  // 🔹 登録 or ログイン
+  // -------------------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
     const endpoint = isRegister ? "register" : "login";
@@ -51,7 +62,7 @@ export default function App() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ email, password }), // ← email を送信
     });
     const data = await res.json();
     if (data.success) {
@@ -63,7 +74,9 @@ export default function App() {
     }
   };
 
+  // -------------------------------
   // 🔹 ログアウト
+  // -------------------------------
   const handleLogout = async () => {
     await fetch(`${API_BASE}/api/logout`, {
       method: "POST",
@@ -73,7 +86,9 @@ export default function App() {
     setHistory([]);
   };
 
-  // 🔹 データ保存テスト（ユーザーごとにhistory追加）
+  // -------------------------------
+  // 🔹 データ保存テスト（ユーザーごと履歴）
+  // -------------------------------
   const handleSaveTest = async () => {
     const res = await fetch(`${API_BASE}/api/history`, {
       method: "POST",
@@ -81,7 +96,7 @@ export default function App() {
       credentials: "include",
       body: JSON.stringify({
         topic: "テスト保存",
-        text: "このデータは " + user + " の履歴です",
+        text: `このデータは ${user} の履歴です`,
       }),
     });
     const data = await res.json();
@@ -93,12 +108,14 @@ export default function App() {
     }
   };
 
-  // ==============================
+  // -------------------------------
   // 🔹 UIレンダリング
-  // ==============================
+  // -------------------------------
   if (!authChecked) return <p>読み込み中...</p>;
 
+  // ===============================
   // ログイン前
+  // ===============================
   if (!user)
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-pink-50">
@@ -111,9 +128,9 @@ export default function App() {
         >
           <input
             type="text"
-            placeholder="ユーザー名"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            placeholder="メールアドレス"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="border border-pink-300 rounded-lg px-3 py-2 w-full mb-3"
           />
           <input
@@ -140,7 +157,9 @@ export default function App() {
       </div>
     );
 
+  // ===============================
   // ログイン後
+  // ===============================
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-pink-50">
       <h1 className="text-2xl font-bold text-pink-600 mb-4">
