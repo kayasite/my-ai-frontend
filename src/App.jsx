@@ -1,22 +1,23 @@
 ﻿import { useState, useEffect } from "react";
 
 export default function App() {
-  // ✅ FlaskのRender URLを指定
+  // ✅ FlaskのRender URL
   const API_BASE = "https://my-ai-poster.onrender.com";
 
   // -------------------------------
-  // 🔹 React 状態管理
+  // 🔹 状態管理
   // -------------------------------
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
-  const [email, setEmail] = useState(""); // ← 修正: email に統一
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isRegister, setIsRegister] = useState(false);
   const [message, setMessage] = useState("");
   const [history, setHistory] = useState([]);
+  const [subscription, setSubscription] = useState("free"); // 🆕 サブスク状態
 
   // -------------------------------
-  // 🔹 ログイン状態チェック
+  // 🔹 初回ログインチェック
   // -------------------------------
   useEffect(() => {
     (async () => {
@@ -28,6 +29,7 @@ export default function App() {
         if (data.logged_in) {
           setUser(data.user);
           await fetchHistory();
+          await fetchSubscription();
         }
       } catch (e) {
         console.error(e);
@@ -53,6 +55,23 @@ export default function App() {
   };
 
   // -------------------------------
+  // 🔹 サブスク状態取得 🆕
+  // -------------------------------
+  const fetchSubscription = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/subscription_status`, {
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSubscription(data.subscription_status);
+      }
+    } catch (err) {
+      console.error("サブスク状態取得失敗:", err);
+    }
+  };
+
+  // -------------------------------
   // 🔹 登録 or ログイン
   // -------------------------------
   const handleSubmit = async (e) => {
@@ -62,13 +81,14 @@ export default function App() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ email, password }), // ← email を送信
+      body: JSON.stringify({ email, password }),
     });
     const data = await res.json();
     if (data.success) {
       setUser(data.user);
       setMessage("✅ " + (isRegister ? "登録完了！" : "ログイン成功！"));
       await fetchHistory();
+      await fetchSubscription();
     } else {
       setMessage("❌ " + (data.message || "失敗しました"));
     }
@@ -84,10 +104,11 @@ export default function App() {
     });
     setUser(null);
     setHistory([]);
+    setSubscription("free");
   };
 
   // -------------------------------
-  // 🔹 データ保存テスト（ユーザーごと履歴）
+  // 🔹 履歴保存テスト
   // -------------------------------
   const handleSaveTest = async () => {
     const res = await fetch(`${API_BASE}/api/history`, {
@@ -109,7 +130,7 @@ export default function App() {
   };
 
   // -------------------------------
-  // 🔹 UIレンダリング
+  // 🔹 表示レンダリング
   // -------------------------------
   if (!authChecked) return <p>読み込み中...</p>;
 
@@ -162,9 +183,20 @@ export default function App() {
   // ===============================
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-pink-50">
-      <h1 className="text-2xl font-bold text-pink-600 mb-4">
+      <h1 className="text-2xl font-bold text-pink-600 mb-2">
         ようこそ {user} さん
       </h1>
+
+      {/* 🆕 サブスクステータス表示 */}
+      {subscription === "active" ? (
+        <div className="p-3 bg-green-100 text-green-700 rounded-xl mb-4">
+          🌟 プレミアム会員（有効）
+        </div>
+      ) : (
+        <div className="p-3 bg-gray-100 text-gray-700 rounded-xl mb-4">
+          🔒 無料プラン中
+        </div>
+      )}
 
       <div className="flex gap-3 mb-6">
         <button
@@ -188,9 +220,9 @@ export default function App() {
           履歴一覧（{history.length}件）
         </h2>
         <ul className="space-y-2 max-h-60 overflow-y-auto">
-          {history.map((item) => (
+          {history.map((item, idx) => (
             <li
-              key={item.id}
+              key={idx}
               className="border border-pink-100 rounded-lg p-3 bg-pink-50"
             >
               <p className="text-sm text-gray-700 font-semibold">
