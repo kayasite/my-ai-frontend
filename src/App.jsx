@@ -129,28 +129,29 @@ export default function App() {
     }
   };
 
-  // -------------------------------
-  // 🆕 Stripe 決済開始
-  // -------------------------------
-  const handleCheckout = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/api/create_checkout_session`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url; // Stripe Checkout へ遷移
-      } else {
-        setMessage("❌ チェックアウトURLの取得に失敗しました");
-      }
-    } catch (err) {
-      console.error("Stripe checkout error:", err);
-      setMessage("❌ Stripeエラーが発生しました");
+// -------------------------------
+// 🆕 Stripe 決済開始
+// -------------------------------
+const handleCheckout = async () => {
+  try {
+    const res = await fetch(`${API_BASE}/api/create_checkout_session`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email: user }), // ✅ 修正！
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url; // Stripe Checkout へ遷移
+    } else {
+      setMessage("❌ チェックアウトURLの取得に失敗しました");
     }
-  };
+  } catch (err) {
+    console.error("Stripe checkout error:", err);
+    setMessage("❌ Stripeエラーが発生しました");
+  }
+};
+
 
   // -------------------------------
   // 表示レンダリング
