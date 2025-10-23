@@ -1,12 +1,8 @@
 ﻿import { useState, useEffect } from "react";
 
 export default function App() {
-  // ✅ Flask の Render API ベースURL
-  const API_BASE = "https://my-ai-poster.onrender.com";
+  const API_BASE = "http://localhost:10000";
 
-  // -------------------------------
-  // 状態管理
-  // -------------------------------
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [email, setEmail] = useState("");
@@ -14,10 +10,10 @@ export default function App() {
   const [isRegister, setIsRegister] = useState(false);
   const [message, setMessage] = useState("");
   const [history, setHistory] = useState([]);
-  const [subscription, setSubscription] = useState("free"); // 🆕 サブスク状態
+  const [subscription, setSubscription] = useState("free");
 
   // -------------------------------
-  // 初回ログインチェック
+  // 初回ログイン確認
   // -------------------------------
   useEffect(() => {
     (async () => {
@@ -25,14 +21,15 @@ export default function App() {
         const res = await fetch(`${API_BASE}/api/check_login`, {
           credentials: "include",
         });
+        if (!res.ok) throw new Error("check_loginエラー");
         const data = await res.json();
         if (data.logged_in) {
           setUser(data.user);
           await fetchHistory();
           await fetchSubscription();
         }
-      } catch (e) {
-        console.error(e);
+      } catch (err) {
+        console.error("ログイン確認失敗:", err);
       } finally {
         setAuthChecked(true);
       }
@@ -47,6 +44,7 @@ export default function App() {
       const res = await fetch(`${API_BASE}/api/history`, {
         credentials: "include",
       });
+      if (!res.ok) throw new Error("historyエラー");
       const data = await res.json();
       if (data.success) setHistory(data.history);
     } catch (err) {
@@ -55,42 +53,46 @@ export default function App() {
   };
 
   // -------------------------------
-  // サブスク状態取得 🆕
+  // サブスク状態取得
   // -------------------------------
   const fetchSubscription = async () => {
     try {
       const res = await fetch(`${API_BASE}/api/subscription_status`, {
         credentials: "include",
       });
+      if (!res.ok) throw new Error("subscription_statusエラー");
       const data = await res.json();
-      if (data.success) {
-        setSubscription(data.subscription_status);
-      }
+      if (data.success) setSubscription(data.subscription_status);
     } catch (err) {
       console.error("サブスク状態取得失敗:", err);
     }
   };
 
   // -------------------------------
-  // 登録 or ログイン
+  // 登録 / ログイン
   // -------------------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
     const endpoint = isRegister ? "register" : "login";
-    const res = await fetch(`${API_BASE}/api/${endpoint}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ email, password }),
-    });
-    const data = await res.json();
-    if (data.success) {
-      setUser(data.user);
-      setMessage("✅ " + (isRegister ? "登録完了！" : "ログイン成功！"));
-      await fetchHistory();
-      await fetchSubscription();
-    } else {
-      setMessage("❌ " + (data.message || "失敗しました"));
+    try {
+      const res = await fetch(`${API_BASE}/api/${endpoint}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setUser(data.user);
+        setMessage("✅ " + (isRegister ? "登録完了！" : "ログイン成功！"));
+        await fetchHistory();
+        await fetchSubscription();
+      } else {
+        setMessage("❌ " + (data.message || "失敗しました"));
+      }
+    } catch (err) {
+      console.error("ログインエラー:", err);
+      setMessage("❌ 通信エラー");
     }
   };
 
@@ -98,69 +100,98 @@ export default function App() {
   // ログアウト
   // -------------------------------
   const handleLogout = async () => {
-    await fetch(`${API_BASE}/api/logout`, {
-      method: "POST",
-      credentials: "include",
-    });
-    setUser(null);
-    setHistory([]);
-    setSubscription("free");
+    try {
+      await fetch(`${API_BASE}/api/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+      setUser(null);
+      setHistory([]);
+      setSubscription("free");
+      setMessage("👋 ログアウトしました");
+    } catch (err) {
+      console.error("ログアウトエラー:", err);
+    }
   };
 
   // -------------------------------
-  // 保存テスト
+  // テストデータ保存
   // -------------------------------
   const handleSaveTest = async () => {
-    const res = await fetch(`${API_BASE}/api/history`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({
-        topic: "テスト保存",
-        text: `このデータは ${user} の履歴です`,
-      }),
-    });
-    const data = await res.json();
-    if (data.success) {
-      setMessage("💾 保存成功！");
-      await fetchHistory();
-    } else {
-      setMessage("❌ 保存失敗");
+    try {
+      const res = await fetch(`${API_BASE}/api/history`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          topic: "テスト保存",
+          text: `このデータは ${user} の履歴です`,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMessage("💾 保存成功！");
+        await fetchHistory();
+      } else {
+        setMessage("❌ 保存失敗");
+      }
+    } catch (err) {
+      console.error("保存エラー:", err);
+      setMessage("❌ 保存エラー");
     }
   };
 
-// -------------------------------
-// 🆕 Stripe 決済開始
-// -------------------------------
-const handleCheckout = async () => {
-  try {
-    const res = await fetch(`${API_BASE}/api/create_checkout_session`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ email: user }), // ✅ 修正！
-    });
-    const data = await res.json();
-    if (data.url) {
-      window.location.href = data.url; // Stripe Checkout へ遷移
-    } else {
-      setMessage("❌ チェックアウトURLの取得に失敗しました");
+  // -------------------------------
+  // Stripe 決済開始
+  // -------------------------------
+  const handleCheckout = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/create_checkout_session`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email: user }),
+      });
+      const data = await res.json();
+      if (data.checkout_url) {
+        window.location.href = data.checkout_url;
+      } else {
+        setMessage("❌ チェックアウトURLの取得に失敗しました");
+      }
+    } catch (err) {
+      console.error("Stripe checkout error:", err);
+      setMessage("❌ Stripeエラーが発生しました");
     }
-  } catch (err) {
-    console.error("Stripe checkout error:", err);
-    setMessage("❌ Stripeエラーが発生しました");
-  }
-};
-
+  };
 
   // -------------------------------
-  // 表示レンダリング
+  // Stripe 解約処理
+  // -------------------------------
+  const handleCancel = async () => {
+    if (!window.confirm("本当に解約しますか？")) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/cancel_subscription`, {
+        method: "POST",
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSubscription("free");
+        setMessage("💔 サブスクを解約しました");
+      } else {
+        setMessage("❌ 解約に失敗しました");
+      }
+    } catch (err) {
+      console.error("解約エラー:", err);
+      setMessage("❌ 通信エラー");
+    }
+  };
+
+  // -------------------------------
+  // レンダリング
   // -------------------------------
   if (!authChecked) return <p>読み込み中...</p>;
 
-  // ===============================
-  // ログイン前
-  // ===============================
   if (!user)
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-pink-50">
@@ -202,16 +233,12 @@ const handleCheckout = async () => {
       </div>
     );
 
-  // ===============================
-  // ログイン後
-  // ===============================
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-pink-50">
       <h1 className="text-2xl font-bold text-pink-600 mb-2">
         ようこそ {user} さん
       </h1>
 
-      {/* 🪙 サブスクステータス */}
       {subscription === "active" ? (
         <div className="p-3 bg-green-100 text-green-700 rounded-xl mb-4">
           🌟 プレミアム会員（有効）
@@ -235,6 +262,14 @@ const handleCheckout = async () => {
             className="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded-lg"
           >
             💳 プレミアム登録
+          </button>
+        )}
+        {subscription === "active" && (
+          <button
+            onClick={handleCancel}
+            className="bg-red-400 hover:bg-red-500 text-white px-4 py-2 rounded-lg"
+          >
+            💔 解約
           </button>
         )}
         <button
