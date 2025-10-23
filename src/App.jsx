@@ -42,6 +42,7 @@ export default function App() {
   const fetchHistory = async () => {
     try {
       const res = await fetch(`${API_BASE}/api/history`, {
+        method: "GET",
         credentials: "include",
       });
       if (!res.ok) throw new Error("historyエラー");
@@ -58,6 +59,7 @@ export default function App() {
   const fetchSubscription = async () => {
     try {
       const res = await fetch(`${API_BASE}/api/subscription_status`, {
+        method: "GET",
         credentials: "include",
       });
       if (!res.ok) throw new Error("subscription_statusエラー");
@@ -173,6 +175,8 @@ export default function App() {
       const res = await fetch(`${API_BASE}/api/cancel_subscription`, {
         method: "POST",
         credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: user }),
       });
       const data = await res.json();
       if (data.success) {
