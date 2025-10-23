@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect } from "react";
 
 export default function App() {
-  const API_BASE = "http://localhost:10000";
+  const API_BASE = "https://my-ai-poster.onrender.com";
 
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
