@@ -1,5 +1,13 @@
 ﻿import React, { useState, useEffect } from 'react';
 
+import axios from "axios";
+
+// 🚀 これを追加（App.jsx の最上部）
+axios.defaults.withCredentials = true; // ← Cookieを必ず送信
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || "https://my-ai-poster.onrender.com";
+axios.defaults.headers.common["Content-Type"] = "application/json";
+
+
 const Calendar = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>;
 const Send = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>;
 const Sparkles = ({ size = 24, className = "" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>;
